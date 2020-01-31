@@ -1,0 +1,9 @@
+---
+local_buildagent_zip_path: /Users/build/teamcity/buildagent-zip
+teamcity_agent_install_dir: /Users/build/teamcity/buildagent
+teamcity_agent_server_hostname: ci01.ccdc.cam.ac.uk
+teamcity_agent_server_port: 80
+teamcity_agent_hostname: build-mac-10.14
+teamcity_agent_launchd_label: jetbrains.teamcity.BuildAgent
+teamcity_agent_launchd_filename: "{{ ansible_env.HOME }}/Library/LaunchAgents/jetbrains.teamcity.BuildAgent.plist"
+teamcity_agent_java_home_macos: /Library/Java/JavaVirtualMachines/adoptopenjdk-13.jdk/Contents/Home/

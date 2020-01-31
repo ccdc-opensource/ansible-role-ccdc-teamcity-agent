@@ -1,0 +1,5 @@
+REM This is called when the build user logs in via a shortcut
+REM If the teamcity agent window is not visible, double click this file and it should launch.
+
+PowerShell -Command "Set-ExecutionPolicy Unrestricted" >> "%TEMP%\StartupLog.txt" 2>&1
+PowerShell E:\teamcity-agent\connect-drives-and-start-tcagent.ps1 >> "%TEMP%\StartupLog.txt" 2>&1

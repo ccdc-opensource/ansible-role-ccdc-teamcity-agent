@@ -1,0 +1,18 @@
+#!/bin/bash
+# chkconfig: 2345 95 05
+# description: teamcity
+
+case "$1" in
+start|stop)
+for a in "{{ hostvars.localhost.teamcity_dest }}"/agent??
+do
+su -l -c "$a/bin/agent.sh $1" buildman
+done
+;;
+*)
+echo "Usage: /etc/init.d/teamcity {start|stop}"
+exit 1
+;;
+esac
+
+exit 0

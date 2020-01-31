@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WorkingDirectory</key>
+	<string>{{ teamcity_agent_install_dir }}</string>
+	<key>Debug</key>
+	<false/>
+	<key>Label</key>
+	<string>{{ teamcity_agent_launchd_label }}</string>
+	<key>OnDemand</key>
+	<false/>
+	<key>KeepAlive</key>
+	<true/>
+    <key>LowPriorityBackgroundIO</key>
+    <false/>
+    <key>LowPriorityIO</key>
+    <false/>
+    <key>ProcessType</key>
+    <string>Interactive</string>
+	<key>EnvironmentVariables</key>
+    <dict>
+           <key>JAVA_HOME</key>
+           <string>{{ teamcity_agent_java_home_macos }}</string>
+    </dict>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/bash</string>
+		<string>--login</string>
+		<string>-c</string>
+		<string>bin/agent.sh run</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StandardErrorPath</key>
+	<string>logs/launchd.err.log</string>
+	<key>StandardOutPath</key>
+	<string>/dev/null</string>
+</dict>
+</plist>
