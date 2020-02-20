@@ -1,0 +1,31 @@
+---
+    dependencies: []
+    
+    galaxy_info:
+      author: cbantaloukas@ccdc.cam.ac.uk
+      description: TeamCity agent setup for CCDC build machines.
+      company: "CCDC"
+      license: "license (BSD, MIT)"
+      min_ansible_version: 2.9
+      platforms:
+        - name: EL
+          versions:
+            - all
+        - name: Fedora
+          versions:
+            - all
+        - name: Debian
+          versions:
+            - all
+        - name: Ubuntu
+          versions:
+            - all
+        - name: Darwin
+          versions:
+            - all
+        - name: Windows
+          versions:
+            - all
+      galaxy_tags:
+        - system
+    
