@@ -5,11 +5,13 @@
       - xorg-x11-drv-dummy # used with teamcity
       - xeyes # for testing
       state: latest
+      use_backend: yum
 
   - name: Install Java - required by Team City agent
   yum:
     name: java-1.8.0-openjdk
     state: latest
+    use_backend: yum
 
 - name: Get the VM Hostname
   shell: hostname
@@ -73,6 +75,7 @@
       - autofs
       - nfs-utils
     state: latest
+    use_backend: yum
     
 - name: Start the autofs service
   service:
