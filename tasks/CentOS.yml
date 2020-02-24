@@ -1,0 +1,120 @@
+---
+- name: Install required packages
+  yum: 
+    name:
+      - xorg-x11-drv-dummy # used with teamcity
+      - xeyes # for testing
+      state: latest
+
+  - name: Install Java - required by Team City agent
+  yum:
+    name: java-1.8.0-openjdk
+    state: latest
+
+- name: Get the VM Hostname
+  shell: hostname
+  register: result
+
+- name: Download Agent zip
+  get_url:
+    url: "http://{{ hostvars.localhost.teamcity_server }}/update/buildAgent.zip"
+    dest: /tmp/buildAgent.zip
+    mode: 0775
+  register: get_url_result
+
+- name: Install each Build Agent
+  include_role:
+    name: build_agent
+  vars:
+    agent_index: "{{ item }}"
+    build_hostname: "{{ result.stdout }}"
+  loop:
+    - "01"
+    - "02"
+    - "03"
+    - "04"
+  when: get_url_result.changed == True
+      
+#- name: "Put TeamCity Agent service file (systemd)"
+#  template:
+#    src: "teamcity-agent.service.j2"
+#    dest: "/lib/systemd/system/teamcity-agent.service"
+#    #mode: 0644
+#  when: "ansible_service_mgr == 'systemd'"
+#- name: "Ensure TeamCity Agent is running"
+#  service:
+#    name: teamcity-agent
+#    state: started
+#    enabled: yes
+
+- name: Automatic buildAgent Start - write init.d file
+  template:
+    src: teamcity.j2
+    dest: /etc/init.d/teamcity
+    mode: 0755
+    force: no
+
+- name: Automatic buildAgent Start - enable and start service
+  service:
+    name: teamcity
+    enabled: yes
+    state: started
+
+- name: Create /home/<user>/builds directory
+  file:
+    path: "/home/{{ build_username }}/builds/"
+    state: directory
+    owner: "{{ build_username }}"
+    group: programmers
+
+- name: Install autofs
+  yum:
+    name:
+      - autofs
+      - nfs-utils
+    state: latest
+    
+- name: Start the autofs service
+  service:
+    name: autofs
+    enabled: yes
+    state: started
+
+- name: link /artefact to /net/unix-artefact/volume1/unix2/artefact
+  file:
+    src: /net/unix-artefact/volume1/unix2/artefact
+    dest: /artefact
+    owner: "{{ build_username }}"
+    group: programmers
+    state: link
+
+- name: Write the Xdummy xorg.conf file
+  copy:
+    src: "{{ role_path }}/files/xorg.conf"
+    dest: "/etc/X11/xdummy_xorg.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Add cron job to start Xdummy on boot
+  cron:
+    name: "Start Xdummy"
+    special_time: reboot
+    job: "sleep 60 ; Xorg -noreset +extension GLX +extension RANDR +extension RENDER -config xdummy_xorg.conf :77 >/dev/null 2>&1"
+    user: root
+  register: xdummy_cron
+
+# Ansible 2.7 includes a reboot module, move to that when possible. 
+- name: Reboot immediately if there was a change.
+  shell: "sleep 5 && reboot"
+  async: 10
+  poll: 0
+  when: xdummy_cron is changed
+
+- name: Wait for the reboot to complete if there was a change.
+  wait_for_connection:
+    connect_timeout: 20
+    sleep: 5
+    delay: 5
+    timeout: 300
+  when: xdummy_cron is changed
