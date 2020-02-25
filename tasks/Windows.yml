@@ -22,7 +22,7 @@
 
 - name: add full control access to the build user
   win_acl:
-    user: ".\\{{teamcity_agent_account}}"
+    user: "{{teamcity_agent_account}}"
     path: "{{teamcity_agent_root_directory}}"
     rights: FullControl
     type: allow
