@@ -20,13 +20,14 @@
     state: absent
   when: ansible_os_family == 'Windows'
 
-- name: add full control access to the build user {{ teamcity_agent_account }}
+- name: Allow "{{ teamcity_agent_account }}" full control over "{{ teamcity_agent_root_directory }}"
   win_acl:
     user: "{{ teamcity_agent_account }}"
     path: "{{ teamcity_agent_root_directory }}"
     rights: FullControl
     type: allow
     state: present
+    propagation: InheritOnly
     inherit: ContainerInherit, ObjectInherit
   when: ansible_os_family == 'Windows'
 
