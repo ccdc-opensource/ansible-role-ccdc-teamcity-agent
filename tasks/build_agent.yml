@@ -28,9 +28,9 @@
   loop_control:
     loop_var: inner_item
 
-- name: Change ownership of all Build Agent files to "{{ build_username }}"
+- name: Change ownership of all Build Agent files to "{{ teamcity_agent_account }}"
   file:
     path: "{{ hostvars.localhost.teamcity_dest }}/agent{{ agent_index }}"
-    owner: "{{ build_username }}"
+    owner: "{{ teamcity_agent_account }}"
     group: programmers
     recurse: yes

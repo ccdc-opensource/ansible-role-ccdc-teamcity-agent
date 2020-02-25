@@ -68,9 +68,9 @@
 
 - name: Create /home/<user>/builds directory
   file:
-    path: "/home/{{ build_username }}/builds/"
+    path: "/home/{{ teamcity_agent_account }}/builds/"
     state: directory
-    owner: "{{ build_username }}"
+    owner: "{{ teamcity_agent_account }}"
     group: programmers
 
 - name: Install autofs
@@ -93,7 +93,7 @@
   file:
     src: /net/unix-artefact/volume1/unix2/artefact
     dest: /artefact
-    owner: "{{ build_username }}"
+    owner: "{{ teamcity_agent_account }}"
     group: programmers
     state: link
   become: yes
