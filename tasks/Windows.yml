@@ -22,7 +22,7 @@
 
 - name: add full control access to the build user
   win_acl:
-    user: ".\{{teamcity_agent_account}}"
+    user: ".\\{{teamcity_agent_account}}"
     path: "{{teamcity_agent_root_directory}}"
     rights: FullControl
     type: allow
@@ -33,18 +33,18 @@
 - name: Create start cmd file
   win_template:
     src: start-tcagent.cmd.j2
-    dest: "C:\Users\{{teamcity_agent_account}}\Desktop\start-tcagent.cmd"
+    dest: "C:\\Users\\{{teamcity_agent_account}}\\Desktop\\start-tcagent.cmd"
   when: "ansible_os_family == 'Windows'"
 
 - name: Create the ps1 file for accessing artefact
   win_template:
     src: tcagent.ps1.j2
-    dest: "{{teamcity_agent_root_directory}}\connect-drives-and-start-tcagent.ps1"
+    dest: "{{teamcity_agent_root_directory}}\\connect-drives-and-start-tcagent.ps1"
   when: "ansible_os_family == 'Windows'"
 
 - name: Create a shortcut to start the agent on login
   win_shortcut:
-    src: 'C:\Users\{{teamcity_agent_account}}\Desktop\start-tcagent.cmd'
-    dest: 'C:\Users\{{teamcity_agent_account}}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\StartTeamcityOnLogin.lnk'
-    directory: 'C:\Users\{{teamcity_agent_account}}\Desktop\'
+    src: 'C:\\Users\\{{teamcity_agent_account}}\\Desktop\\start-tcagent.cmd'
+    dest: 'C:\\Users\\{{teamcity_agent_account}}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\StartTeamcityOnLogin.lnk'
+    directory: 'C:\\Users\\{{teamcity_agent_account}}\\Desktop\\'
   when: "ansible_os_family == 'Windows'"
