@@ -1,5 +1,5 @@
 ---
 teamcity_server_url: http://ci01.ccdc.cam.ac.uk
-teamcity_agent_account: build
-teamcity_agent_account_password: cambridge
+teamcity_agent_account: vagrant
+teamcity_agent_account_password: vagrant
 teamcity_agent_root_directory: "E:\\teamcity-agent"
