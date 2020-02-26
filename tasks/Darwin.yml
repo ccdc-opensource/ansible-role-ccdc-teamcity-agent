@@ -8,32 +8,18 @@
     name: adoptopenjdk11
     state: present
 
-- name: "Create Agent zip directory"
-  file:
-    path: "{{ local_buildagent_zip_path }}"
-    state: directory
-    mode: 0755
-
-- name: "Download Agent Package"
-  get_url:
-    url: "http://{{ teamcity_agent_server_hostname }}:{{ teamcity_agent_server_port }}/update/buildAgent.zip"
-    dest: "{{ local_buildagent_zip_path }}"
-    validate_certs: no
-    timeout: 60
-  register: _teamcity_agent_package
-
 - name: "Create Agent directory"
   file:
     path: "{{ teamcity_agent_install_dir }}"
     state: directory
     mode: 0755
 
-- name: "Unpack distribution"
+- name: "Download and extract Agent package"
   unarchive:
-    src: "{{ local_buildagent_zip_path }}/buildAgent.zip"
+    src: "{{ teamcity_server_url }}/update/buildAgent.zip"
     dest: "{{ teamcity_agent_install_dir }}"
-    copy: "no"
-  when: _teamcity_agent_package is changed
+    remote_src: yes
+    validate_certs: no
 
 - name: "Save agent auth token"
   shell: "grep authorizationToken {{ teamcity_agent_install_dir }}/conf/buildAgent.properties | sed 's/authorizationToken=//g'"

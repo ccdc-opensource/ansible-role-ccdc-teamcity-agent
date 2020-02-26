@@ -2,36 +2,32 @@
 - name: Install required packages
   yum: 
     name:
-      - xorg-x11-drv-dummy # used with teamcity
-      - xeyes # for testing
+      - xorg-x11-drv-dummy # Used to allow tests that require GUI
     state: latest
     use_backend: yum
   become: yes
 
-  - name: Install Java - required by Team City agent
-  yum:
-    name: java-1.8.0-openjdk
-    state: latest
-    use_backend: yum
-  become: yes
-
+- name: Install Java
+  include_role:
+    name: lean_delivery.java
+  
 - name: Get the VM Hostname
   shell: hostname
-  register: result
+  register: hostname_result
 
 - name: Download Agent zip
   get_url:
-    url: "http://{{ hostvars.localhost.teamcity_server }}/update/buildAgent.zip"
+    url: "{{ teamcity_server_url }}/update/buildAgent.zip"
     dest: /tmp/buildAgent.zip
     mode: 0775
   register: get_url_result
 
-- name: Install each Build Agent
+- name: Install Build Agents
   include_role:
     name: build_agent
   vars:
     agent_index: "{{ item }}"
-    build_hostname: "{{ result.stdout }}"
+    build_hostname: "{{ hostname_result.stdout }}"
   loop:
     - "01"
     - "02"
@@ -66,7 +62,7 @@
     state: started
   become: yes
 
-- name: Create /home/<user>/builds directory
+- name: Create /home/{{ teamcity_agent_account }}/builds directory
   file:
     path: "/home/{{ teamcity_agent_account }}/builds/"
     state: directory
@@ -118,15 +114,5 @@
 
 # Ansible 2.7 includes a reboot module, move to that when possible. 
 - name: Reboot immediately if there was a change.
-  shell: "sleep 5 && reboot"
-  async: 10
-  poll: 0
-  when: xdummy_cron is changed
-
-- name: Wait for the reboot to complete if there was a change.
-  wait_for_connection:
-    connect_timeout: 20
-    sleep: 5
-    delay: 5
-    timeout: 300
+  reboot:
   when: xdummy_cron is changed
