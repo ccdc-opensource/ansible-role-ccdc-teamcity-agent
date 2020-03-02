@@ -1,0 +1,6 @@
+[Unit]
+Description=Dummy X server providing DISPLAY=:77"
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/Xorg -noreset +extension GLX +extension RANDR +extension RENDER -config xdummy_xorg.conf -logfile /var/log/Xorg.log :77

@@ -1,36 +1,60 @@
-- name: Make sure directory "{{ hostvars.localhost.teamcity_dest }}/agentXX" exists
+- name: Agent {{ agent_index }}-- Ensure "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}" exists
   file:
-    path: "{{ hostvars.localhost.teamcity_dest }}/agent{{ agent_index }}"
+    path: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}"
     state: directory
     recurse: yes
 
-- name: Extract buildAgent.zip
+- name: Agent {{ agent_index }}-- Extract buildAgent.zip
   unarchive:
     src: /tmp/buildAgent.zip
-    dest: "{{ hostvars.localhost.teamcity_dest }}/agent{{ agent_index }}"
-    creates: "{{ hostvars.localhost.teamcity_dest }}/agent{{ item }}/bin/agent.sh"
+    dest: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}"
+    creates: "{{ teamcity_agent_install_dir }}}/agent{{ agent_index }}/bin/agent.sh"
     remote_src: yes
 
-- name: Rename Buildagent buildAgent.dist.properties
-  copy:
-    src: "{{ hostvars.localhost.teamcity_dest }}/agent{{ agent_index }}/conf/buildAgent.dist.properties"
-    dest: "{{ hostvars.localhost.teamcity_dest }}/agent{{ agent_index }}/conf/buildAgent.properties"
-    remote_src: yes
-    force: no
+# - name: Agent {{ agent_index }}-- Rename Buildagent buildAgent.dist.properties
+#   copy:
+#     src: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}/conf/buildAgent.dist.properties"
+#     dest: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}/conf/buildAgent.properties"
+#     remote_src: yes
+#     force: no
 
-- lineinfile:
-    path: "{{ hostvars.localhost.teamcity_dest }}/agent{{ agent_index }}/conf/buildAgent.properties"
-    regexp: "{{ inner_item.regexp }}"
-    line: "{{ inner_item.line }}"
-  loop:
-    - { regexp: "^serverUrl=http://localhost:8111/", line: "serverUrl=http://{{ hostvars.localhost.teamcity_server }}:8111/" }
-    - { regexp: "^name=", line: "name={{ build_hostname }}" }
-  loop_control:
-    loop_var: inner_item
+# - name: Agent {{ agent_index }}-- Configure agent to connect to http://{{ teamcity_server_hostname }}:{{ teamcity_server_port }}/ and register as {{ build_hostname }}
+#   lineinfile:
+#     path: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}/conf/buildAgent.properties"
+#     regexp: "{{ inner_item.regexp }}"
+#     line: "{{ inner_item.line }}"
+#   loop:
+#     - { regexp: "^serverUrl=http://localhost:8111/", line: "serverUrl=http://{{ teamcity_server_hostname }}:{{ teamcity_server_port }}/" }
+#     - { regexp: "^name=", line: "name={{ build_hostname }}" }
+#   loop_control:
+#     loop_var: inner_item
 
-- name: Change ownership of all Build Agent files to "{{ teamcity_agent_account }}"
+- name: Agent {{ agent_index }}-- Copy agent configuration
+  template:
+    src: "buildAgent.properties.j2"
+    dest: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}/conf/buildAgent.properties"
+
+- name: Agent {{ agent_index }}-- Change ownership of all Build Agent files to "{{ teamcity_agent_account }}"
   file:
-    path: "{{ hostvars.localhost.teamcity_dest }}/agent{{ agent_index }}"
+    path: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}"
     owner: "{{ teamcity_agent_account }}"
-    group: programmers
+    # group: programmers
     recurse: yes
+
+- name: Agent {{ agent_index }}-- Deploy TeamCity systemd unit
+  template:
+    src: "teamcity-agent.service.j2"
+    dest: "/etc/systemd/system/teamcity-agent{{ agent_index }}.service"
+  become: yes
+
+- name: Agent {{ agent_index }}-- Reload systemd unit files
+  systemd:
+    daemon_reload: yes
+  become: yes
+
+- name: Agent {{ agent_index }}-- Ensure TeamCity Agent is running
+  service:
+    name: teamcity-agent{{ agent_index }}
+    state: restarted
+    enabled: yes
+  become: yes

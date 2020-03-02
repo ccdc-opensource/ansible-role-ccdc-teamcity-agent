@@ -10,7 +10,10 @@
 - name: Install Java
   include_role:
     name: lean_delivery.java
-  
+  vars:
+    java_distribution: adoptopenjdk
+    java_major_version: 11
+
 - name: Get the VM Hostname
   shell: hostname
   register: hostname_result
@@ -23,51 +26,35 @@
   register: get_url_result
 
 - name: Install Build Agents
-  include_role:
-    name: build_agent
+  include_tasks:
+    file: "build_agent.yml"
   vars:
-    agent_index: "{{ item }}"
+    agent_index: "{{ '%02d' | format(agent_id) }}"
     build_hostname: "{{ hostname_result.stdout }}"
-  loop:
-    - "01"
-    - "02"
-    - "03"
-    - "04"
-  when: get_url_result.changed == True
+  loop: "{{ range(1, 4 + 1, 1) | list }}"
+  loop_control:
+    loop_var: agent_id
 
-#- name: "Put TeamCity Agent service file (systemd)"
-#  template:
-#    src: "teamcity-agent.service.j2"
-#    dest: "/lib/systemd/system/teamcity-agent.service"
-#    #mode: 0644
-#  when: "ansible_service_mgr == 'systemd'"
-#- name: "Ensure TeamCity Agent is running"
-#  service:
-#    name: teamcity-agent
-#    state: started
-#    enabled: yes
+# - name: Automatic buildAgent Start - write init.d file
+#   template:
+#     src: teamcity.j2
+#     dest: /etc/init.d/teamcity
+#     mode: 0755
+#     force: no
+#   become: yes
 
-- name: Automatic buildAgent Start - write init.d file
-  template:
-    src: teamcity.j2
-    dest: /etc/init.d/teamcity
-    mode: 0755
-    force: no
-  become: yes
-
-- name: Automatic buildAgent Start - enable and start service
-  service:
-    name: teamcity
-    enabled: yes
-    state: started
-  become: yes
+# - name: Automatic buildAgent Start - enable and start service
+#   service:
+#     name: teamcity
+#     enabled: yes
+#     state: started
+#   become: yes
 
 - name: Create /home/{{ teamcity_agent_account }}/builds directory
   file:
     path: "/home/{{ teamcity_agent_account }}/builds/"
     state: directory
     owner: "{{ teamcity_agent_account }}"
-    group: programmers
 
 - name: Install autofs
   yum:
@@ -78,21 +65,20 @@
     use_backend: yum
   become: yes
     
-- name: Start the autofs service
+- name: Enable the autofs service
   service:
     name: autofs
     enabled: yes
     state: started
   become: yes
 
-- name: link /artefact to /net/unix-artefact/volume1/unix2/artefact
-  file:
-    src: /net/unix-artefact/volume1/unix2/artefact
-    dest: /artefact
-    owner: "{{ teamcity_agent_account }}"
-    group: programmers
-    state: link
-  become: yes
+# - name: Link /artefact to /net/unix-artefact/volume1/unix2/artefact
+#   file:
+#     src: /net/unix-artefact/volume1/unix2/artefact
+#     dest: /artefact
+#     owner: "{{ teamcity_agent_account }}"
+#     state: link
+#   become: yes
 
 - name: Write the Xdummy xorg.conf file
   copy:
@@ -102,17 +88,19 @@
     group: root
     mode: 0644
   become: yes
-
-- name: Add cron job to start Xdummy on boot
-  cron:
-    name: "Start Xdummy"
-    special_time: reboot
-    job: "sleep 60 ; Xorg -noreset +extension GLX +extension RANDR +extension RENDER -config xdummy_xorg.conf :77 >/dev/null 2>&1"
-    user: root
-  register: xdummy_cron
+  
+- name: Copy Xdummy systemd unit
+  copy:
+    src: "{{ role_path }}/files/xdummy.service"
+    dest: "/etc/systemd/system/xdummy.service"
+    owner: root
+    group: root
+    mode: 0644
   become: yes
 
-# Ansible 2.7 includes a reboot module, move to that when possible. 
-- name: Reboot immediately if there was a change.
-  reboot:
-  when: xdummy_cron is changed
+- name: Start and enable the Xdummy service
+  service:
+    name: xdummy
+    enabled: yes
+    state: started
+  become: yes
