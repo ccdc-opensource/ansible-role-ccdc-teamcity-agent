@@ -1,0 +1,3 @@
+---
+teamcity_agent_install_dir: /home/{{ teamcity_agent_account }}/teamcity
+teamcity_agent_hostname: buildlinux-centos7

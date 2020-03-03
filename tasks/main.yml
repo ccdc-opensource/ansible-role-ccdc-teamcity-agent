@@ -1,4 +1,16 @@
 ---
+  - name: Read platform-specific variables
+    include_vars: "{{ varfile }}"
+    with_first_found:
+      - files:
+          - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+          - "{{ ansible_distribution }}.yml"
+          - "{{ ansible_os_family }}.yml"
+          - "{{ ansible_system }}.yml"
+        skip: true
+    loop_control:
+      loop_var: varfile
+  
   - name: Set up TeamCity agent
     include_tasks: "{{ taskfile }}"
     with_first_found:

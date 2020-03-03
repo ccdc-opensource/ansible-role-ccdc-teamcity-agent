@@ -1,0 +1,42 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+    config.vm.define "vagrant-stage2-windows-2019"
+
+    # Basic settings
+    config.vm.hostname = "buildlocal"
+    config.vm.box = "ccdc-basebox/windows-2019"
+    # Workaround for bug in artifactory not handling / in package names
+    config.vm.box_url = "https://artifactory.ccdc.cam.ac.uk/api/vagrant/ccdc-vagrant-repo/ccdc-basebox%2Fwindows-2019"
+
+    # Turn on autologon after sysprep
+    config.vm.provision "shell", privileged: false, reboot: true, inline: <<-SHELL
+      Set-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" -Name AutoAdminLogon -Value 1
+      Set-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" -Name DefaultUserName -Value "vagrant"
+      Set-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" -Name DefaultPassword -Value "vagrant"
+      Remove-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" -Name AutoAdminLogonCount -Confirm -ErrorAction SilentlyContinue
+    SHELL
+
+    # Apply stage 2 ansible roles
+    config.vm.provision "ansible" do |ansible|
+      ansible.verbose = "v"
+
+      # Set up WinRM for Ansible
+      ansible.extra_vars = {
+          ansible_connection: 'winrm',
+          ansible_winrm_server_cert_validation: 'ignore',
+          ansible_winrm_transport: 'ntlm',
+          ansible_shell_type: 'powershell',
+          ansible_shell_executable: 'None',
+      }
+
+      ansible.verbose = "v"
+      ansible.playbook = "../playbook.yml"
+      ansible.galaxy_role_file = "../../requirements.yml"
+      # Download requirements into the downloaded-roles folder
+      ansible.galaxy_command = "ansible-galaxy install -p downloaded-roles --role-file=%{role_file} --force"
+      # Use both the downloaded roles folder and the roles from git
+      ansible.galaxy_roles_path = "../../..:./downloaded-roles" 
+    end
+end

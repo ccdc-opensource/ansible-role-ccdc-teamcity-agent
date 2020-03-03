@@ -1,0 +1,85 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+# https://blogs.msdn.microsoft.com/commandline/2018/01/12/chmod-chown-wsl-improvements/
+# https://blogs.msdn.microsoft.com/commandline/2018/02/07/automatically-configuring-wsl/
+
+Vagrant.configure("2") do |config|
+    config.vm.define "cppbuilder-centos7"
+    config.vm.box = "ccdc-basebox/centos-7.7"
+    # Workaround for bug in artifactory not handling / in package names
+    config.vm.box_url = "https://artifactory.ccdc.cam.ac.uk/api/vagrant/ccdc-vagrant-repo/ccdc-basebox%2Fcentos-7.7"
+    config.vm.hostname = "buildlocal"
+
+#    config.vm.network :forwarded_port, guest: 4322, host: 44322, id: "squish_server", auto_correct: true
+
+    config.vm.provider :virtualbox do |v, override|
+        # Move VirtualBox NAT subnet as default 10.0.2.0/24 clashes with CCDC network
+        v.customize ["modifyvm", :id, "--natnet1", "10.100.100.0/24"]
+        v.gui = true
+        v.customize ["modifyvm", :id, "--memory", 12288]
+        v.customize ["modifyvm", :id, "--cpus", 8]
+        v.customize ["modifyvm", :id, "--vram", 128]
+        v.customize ["modifyvm", :id, "--clipboard-mode", "bidirectional"]
+        v.customize ["setextradata", "global", "GUI/SuppressMessages", "all" ]
+    end
+    config.vm.provider :vmware_fusion do |v, override|
+        v.gui = true
+        v.vmx["memsize"] = "12288"
+        v.vmx["numvcpus"] = "8"
+        v.enable_vmrun_ip_lookup = false
+    end
+    config.vm.provider :vmware_workstation do |v, override|
+        v.gui = true
+        v.vmx["memsize"] = "12288"
+        v.vmx["numvcpus"] = "8"
+        v.enable_vmrun_ip_lookup = false
+    end
+    
+    config.ssh.forward_agent = true
+    config.ssh.forward_x11 = true
+
+    #config.vm.provision "shell", inline: "mkdir -p /opt/ccdc/export_data"
+    #config.vm.synced_folder "..", "/provisioning", mount_options: ["dmode=775,fmode=664"]
+    #config.vm.synced_folder "/mnt/d/x_mirror/CSDv541", "/opt/ccdc/export_data/CSDS_V541"
+
+    # Push the ssh keys from the local ubuntu user into the build machine
+    # This script was pilfered from
+    # https://stackoverflow.com/questions/30075461/how-do-i-add-my-own-public-key-to-vagrant-vm
+    
+    config.vm.provision "shell" do |s|
+        ssh_prv_key = ""
+        ssh_pub_key = ""
+        if File.file?("#{Dir.home}/.ssh/id_rsa")
+            ssh_prv_key = File.read("#{Dir.home}/.ssh/id_rsa")
+            ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
+        else
+            puts "No SSH key found. You will need to remedy this before pushing to the repository."
+        end
+        s.inline = <<-SHELL
+            if grep -sq "#{ssh_pub_key}" /home/vagrant/.ssh/authorized_keys; then
+            echo "SSH keys already provisioned."
+            exit 0;
+            fi
+            echo "SSH key provisioning."
+            mkdir -p /home/vagrant/.ssh/
+            touch /home/vagrant/.ssh/authorized_keys
+            echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
+            echo #{ssh_pub_key} > /home/vagrant/.ssh/id_rsa.pub
+            chmod 644 /home/vagrant/.ssh/id_rsa.pub
+            echo "#{ssh_prv_key}" > /home/vagrant/.ssh/id_rsa
+            chmod 600 /home/vagrant/.ssh/id_rsa
+            chown -R vagrant:vagrant /home/vagrant
+            exit 0
+        SHELL
+    end
+
+    config.vm.provision "ansible" do |ansible|
+      ansible.verbose = "v"
+      ansible.playbook = "../playbook.yml"
+      ansible.galaxy_role_file = "../../requirements.yml"
+      # Download requirements into the downloaded-roles folder
+      ansible.galaxy_command = "ansible-galaxy install -p downloaded-roles --role-file=%{role_file} --force"
+      # Use both the downloaded roles folder and the roles from git
+      ansible.galaxy_roles_path = "../../..:./downloaded-roles" 
+    end
+end

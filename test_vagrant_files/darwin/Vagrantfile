@@ -1,0 +1,27 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+    config.vm.define "vagrant-stage2-macosx-10.15"
+    config.vm.hostname = "buildlocal"
+    config.vm.box = "ccdc-basebox/macosx-10.15"
+    # Workaround for bug in artifactory not handling / in package names
+    config.vm.box_url = "https://artifactory.ccdc.cam.ac.uk/api/vagrant/ccdc-vagrant-repo/ccdc-basebox%2Fmacosx-10.15"
+
+    config.vm.provider :vmware_desktop do |v, override|
+        v.gui = true
+        v.vmx["ethernet0.virtualDev"] = "e1000e"
+        v.vmx["memsize"] = "12288"
+        v.vmx["numvcpus"] = "8"
+    end
+
+    config.vm.provision "ansible" do |ansible|
+      ansible.verbose = "v"
+      ansible.playbook = "../playbook.yml"
+      ansible.galaxy_role_file = "../../requirements.yml"
+      # Download requirements into the downloaded-roles folder
+      ansible.galaxy_command = "ansible-galaxy install -p downloaded-roles --role-file=%{role_file} --force"
+      # Use both the downloaded roles folder and the roles from git
+      ansible.galaxy_roles_path = "../../..:./downloaded-roles" 
+    end
+end

@@ -1,0 +1,8 @@
+---
+  - hosts: all
+    gather_facts: yes
+    roles:
+      - ccdc-cpp-buildmachine-teamcity-agent
+    vars:
+      ccdc_cpp_production_buildmachine: False
+  
