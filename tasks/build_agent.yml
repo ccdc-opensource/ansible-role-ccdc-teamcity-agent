@@ -1,3 +1,14 @@
+- name: Agent {{ agent_index }}-- Check for existing configuration
+  stat:
+    path: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}/conf/buildAgent.properties"
+  register: current_config_file
+
+- name: Agent {{ agent_index }}-- Read existing configuration
+  slurp:
+    src: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}/conf/buildAgent.properties"
+  register: current_config
+  when: current_config_file.stat.exists
+
 - name: Agent {{ agent_index }}-- Ensure "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}" exists
   file:
     path: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}"
@@ -15,6 +26,8 @@
   template:
     src: "buildAgent.properties.j2"
     dest: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}/conf/buildAgent.properties"
+  vars:
+    _teamcity_agent_token: "{{ current_config['content'] | default('') | b64decode | regex_findall('authorizationToken=(.+)') | first | default('') }}"
 
 - name: Agent {{ agent_index }}-- Change ownership of all Build Agent files to "{{ teamcity_agent_account }}"
   file:
@@ -27,4 +40,15 @@
     src: "teamcity-agent.service.j2"
     dest: "/etc/systemd/system/teamcity-agent{{ agent_index }}.service"
   become: yes
-  notify: reload_agents
+  register: agent_unit
+  notify:
+    - Reload systemd units
+
+# We have to do this separately rather than via a handler because we can't pass variables to handlers.
+- name: Restart TeamCity Agent
+  service:
+    name: teamcity-agent{{ agent_index }}
+    state: restarted
+    enabled: yes
+  become: yes
+  when: agent_unit.changed

@@ -32,7 +32,7 @@ systemDir=../system
 
 ## A token which is used to identify this agent on the TeamCity server for agent authorization purposes.
 ## It is automatically generated and saved back on the first agent connection to the server.
-authorizationToken={{ _teamcity_agent_token.stdout if _teamcity_agent_token else '' }}
+authorizationToken={{ _teamcity_agent_token | default("''") }}
 
 
 ######################################
