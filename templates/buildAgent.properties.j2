@@ -6,7 +6,7 @@
 
 ## The address of the TeamCity server. The same as is used to open TeamCity web interface in the browser.
 ## Example:  serverUrl=https://buildserver.mydomain.com:8111
-serverUrl=http://{{ teamcity_server_hostname }}:{{ teamcity_server_port }}/
+serverUrl={{ teamcity_server_url }}
 
 ## The unique name of the agent used to identify this agent on the TeamCity server
 ## Use blank name to let server generate it.
@@ -32,7 +32,7 @@ systemDir=../system
 
 ## A token which is used to identify this agent on the TeamCity server for agent authorization purposes.
 ## It is automatically generated and saved back on the first agent connection to the server.
-authorizationToken=''
+authorizationToken={{ _teamcity_agent_token.stdout if _teamcity_agent_token else '' }}
 
 
 ######################################

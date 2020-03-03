@@ -1,5 +1,3 @@
 ---
-teamcity_server_hostname: ci01.ccdc.cam.ac.uk
-teamcity_server_port: 80
+teamcity_server_url: http://ci01.ccdc.cam.ac.uk/
 teamcity_agent_hostname: buildmachine
-artefact_upload_password: "{{ ansible_env.CCDC_ARTEFACT_PASSWORD }}"
