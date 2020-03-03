@@ -1,12 +1,4 @@
 ---
-- name: Install required packages
-  yum: 
-    name:
-      - xorg-x11-drv-dummy # Used to allow tests that require GUI
-    state: latest
-    use_backend: yum
-  become: yes
-
 - name: Install Java
   include_role:
     name: lean_delivery.java
