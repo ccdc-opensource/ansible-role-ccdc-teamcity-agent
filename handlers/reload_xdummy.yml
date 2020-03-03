@@ -1,0 +1,12 @@
+---
+- name: Reload systemd unit files
+  systemd:
+    daemon_reload: yes
+  become: yes
+
+- name: Start and enable the Xdummy service
+  service:
+    name: xdummy
+    enabled: yes
+    state: started
+  become: yes

@@ -1,0 +1,8 @@
+---
+- name: Enable the autofs service
+  service:
+    name: autofs
+    enabled: yes
+    state: started
+  become: yes
+

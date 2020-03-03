@@ -11,24 +11,6 @@
     creates: "{{ teamcity_agent_install_dir }}}/agent{{ agent_index }}/bin/agent.sh"
     remote_src: yes
 
-# - name: Agent {{ agent_index }}-- Rename Buildagent buildAgent.dist.properties
-#   copy:
-#     src: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}/conf/buildAgent.dist.properties"
-#     dest: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}/conf/buildAgent.properties"
-#     remote_src: yes
-#     force: no
-
-# - name: Agent {{ agent_index }}-- Configure agent to connect to http://{{ teamcity_server_hostname }}:{{ teamcity_server_port }}/ and register as {{ build_hostname }}
-#   lineinfile:
-#     path: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}/conf/buildAgent.properties"
-#     regexp: "{{ inner_item.regexp }}"
-#     line: "{{ inner_item.line }}"
-#   loop:
-#     - { regexp: "^serverUrl=http://localhost:8111/", line: "serverUrl=http://{{ teamcity_server_hostname }}:{{ teamcity_server_port }}/" }
-#     - { regexp: "^name=", line: "name={{ build_hostname }}" }
-#   loop_control:
-#     loop_var: inner_item
-
 - name: Agent {{ agent_index }}-- Copy agent configuration
   template:
     src: "buildAgent.properties.j2"
@@ -38,7 +20,6 @@
   file:
     path: "{{ teamcity_agent_install_dir }}/agent{{ agent_index }}"
     owner: "{{ teamcity_agent_account }}"
-    # group: programmers
     recurse: yes
 
 - name: Agent {{ agent_index }}-- Deploy TeamCity systemd unit
@@ -46,15 +27,4 @@
     src: "teamcity-agent.service.j2"
     dest: "/etc/systemd/system/teamcity-agent{{ agent_index }}.service"
   become: yes
-
-- name: Agent {{ agent_index }}-- Reload systemd unit files
-  systemd:
-    daemon_reload: yes
-  become: yes
-
-- name: Agent {{ agent_index }}-- Ensure TeamCity Agent is running
-  service:
-    name: teamcity-agent{{ agent_index }}
-    state: restarted
-    enabled: yes
-  become: yes
+  notify: reload_agents

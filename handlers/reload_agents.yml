@@ -1,0 +1,12 @@
+---
+- name: Reload systemd unit files
+  systemd:
+    daemon_reload: yes
+  become: yes
+
+- name: Restart TeamCity agents
+  service:
+    name: teamcity-agent{{ agent_index }}
+    state: restarted
+    enabled: yes
+  become: yes

@@ -64,14 +64,8 @@
     state: latest
     use_backend: yum
   become: yes
+  notify: reload_autofs
     
-- name: Enable the autofs service
-  service:
-    name: autofs
-    enabled: yes
-    state: started
-  become: yes
-
 # - name: Link /artefact to /net/unix-artefact/volume1/unix2/artefact
 #   file:
 #     src: /net/unix-artefact/volume1/unix2/artefact
@@ -97,10 +91,4 @@
     group: root
     mode: 0644
   become: yes
-
-- name: Start and enable the Xdummy service
-  service:
-    name: xdummy
-    enabled: yes
-    state: started
-  become: yes
+  notify: reload_xdummy
