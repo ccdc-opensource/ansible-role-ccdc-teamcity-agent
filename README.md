@@ -1,24 +1,24 @@
-# Ansible Role: Set up TeamCity agent
+# Ansible Role: Set up TeamCity agents
 
-Install and configure CCDC TeamCity agent
+Install and configure a number of TeamCity agents
 
-Applying this role will set up the TeamCity agent on the build machine. This will download the package and set up
+Applying this role will set up a set of TeamCity agents on the build machine. This will download the package and set up
 a service to start it, as well as configure it to connect to a TeamCity server.
 
 ## Requirements
 
-None.
+- lean_delivery.java: to install java on Windows/Linux
+- geerlingguy.homebrew: to install java on MacOS
 
 ## Role Variables
 
-local_buildagent_zip_path: /Users/build/teamcity/buildagent-zip
-teamcity_agent_install_dir: string; the installation directory for the TeamCity agent.
-teamcity_agent_server_hostname: string; the host name for the TeamCity server to connect to.
-teamcity_agent_server_port: int; the port on the TeamCity server to use.
-teamcity_agent_hostname: string; the hostname to register the agent on the TeamCity server with.
-teamcity_agent_launchd_label: string; (macOS only) the label for the launchd service for the TeamCity agent.
-teamcity_agent_launchd_filename: string; (macOS only) the file in which to save the launchd service for the TeamCity agent.
-teamcity_agent_java_home_macos: string; (macOS only) the Java home directory to use for the TeamCity agent.
+- teamcity_server_url: The url that the teamcity server responds to
+- teamcity_build_username: Name of the local user that will be running the teamcity agent
+- teamcity_build_user_password: Password of the local user that will be running the teamcity agent (only useful on Windows)
+- teamcity_downloaded_buildagent_zip: Where to download the buildAgent.zip file that will be unpacked
+- teamcity_buildagent_zip_url: Where to download the buildAgent.zip file from
+- teamcity_number_of_agents: 4 How many agents to install on a single machine. NOTE: The agents will run under the same username.
+- teamcity_agent_java_home_macos: string; (macOS only) the Java home directory to use for the TeamCity agent.
 
 ## Dependencies
 
@@ -36,4 +36,4 @@ MIT / BSD
 
 ## Author Information
 
-This role was created in 2020 by Claudio Bantaloukas, based on existing roles at CCDC, by Jeff Geerling and google searches
+This role was created in 2020 by Claudio Bantaloukas/Florian Piesche, based on existing roles at CCDC, by Jeff Geerling and google searches
