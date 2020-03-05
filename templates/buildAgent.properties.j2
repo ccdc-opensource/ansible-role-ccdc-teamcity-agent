@@ -11,7 +11,7 @@ serverUrl={{ teamcity_server_url }}
 ## The unique name of the agent used to identify this agent on the TeamCity server
 ## Use blank name to let server generate it.
 ## By default, this name would be created from the build agent's host name
-name={{ teamcity_agent_hostname }}
+name={{ teamcity_single_agent_name }}
 
 ## Container directory to create default checkout directories for the build configurations.
 ## TeamCity agent assumes ownership of the directory and will delete unknown directories inside.
