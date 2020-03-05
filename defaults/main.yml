@@ -1,5 +1,8 @@
 ---
 teamcity_server_url: http://ci01.ccdc.cam.ac.uk
-teamcity_agent_account: vagrant
-teamcity_agent_account_password: vagrant
-teamcity_agent_root_directory: "E:\\teamcity-agent"
+teamcity_build_username: vagrant
+teamcity_build_user_password: vagrant
+teamcity_downloaded_buildagent_zip: "{{ teamcity_agent_install_dir }}/teamcity-agent.zip"
+teamcity_buildagent_zip_url: "{{ teamcity_server_url }}/update/buildAgent.zip"
+teamcity_number_of_agents: 4
+teamcity_buildagent_drive: E
