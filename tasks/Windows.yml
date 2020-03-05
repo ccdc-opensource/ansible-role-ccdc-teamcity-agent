@@ -1,44 +1,31 @@
 ---
+- name: Install Java
+  include_role:
+    name: lean_delivery.java
+  vars:
+    java_distribution: adoptopenjdk
+    java_major_version: 11
 
-- name: Install TeamCity Agent
+- name: Install 7zip
   win_chocolatey:
-    name: teamcityagent
-    state: present
-    allow_empty_checksums: true
-    package_params: "serverUrl={{ teamcity_server_url }} agentName={{ inventory_hostname }} agentDir={{ teamcity_agent_root_directory }} serviceAccount=.\\{{ teamcity_agent_account }} serviceAccountPassword={{ teamcity_agent_account_password }}"
-
-- name: Install jre8
-  win_chocolatey:
-    name: jre8
+    name: 7zip.install
     state: present
 
-- name: Remove generated service (we run this manually)
-  win_service:
-    name: "{{ inventory_hostname }} TeamCity Build Agent"
-    state: absent
+- name: Create teamcity agent install directory
+  win_file:
+    path: "{{ teamcity_agent_install_dir }}"
+    state: directory
 
-- name: Allow "{{ teamcity_agent_account }}" full control over "{{ teamcity_agent_root_directory }}"
-  win_acl:
-    user: "{{ teamcity_agent_account }}"
-    path: "{{ teamcity_agent_root_directory }}"
-    rights: FullControl
-    type: allow
-    state: present
-    propagation: InheritOnly
-    inherit: ContainerInherit, ObjectInherit
+- name: Download teamcity buildAgent.zip
+  win_get_url:
+    url: "{{ teamcity_server_url }}/update/buildAgent.zip"
+    dest: "{{ teamcity_downloaded_buildagent_zip }}"
 
-- name: Create start cmd file
-  win_template:
-    src: start-tcagent.cmd.j2
-    dest: "C:\\Users\\{{ teamcity_agent_account }}\\Desktop\\start-tcagent.cmd"
-
-- name: Create the ps1 file for accessing artefact
-  win_template:
-    src: tcagent.ps1.j2
-    dest: "{{teamcity_agent_root_directory}}\\connect-drives-and-start-tcagent.ps1"
-
-- name: Create a shortcut to start the agent on login
-  win_shortcut:
-    src: 'C:\\Users\\{{ teamcity_agent_account }}\\Desktop\\start-tcagent.cmd'
-    dest: 'C:\\Users\\{{ teamcity_agent_account }}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\StartTeamcityOnLogin.lnk'
-    directory: 'C:\\Users\\{{ teamcity_agent_account }}\\Desktop\\'
+- name: Install Build Agents
+  include_tasks:
+    file: "single_build_agent.yml"
+  vars:
+    agent_number_formatted: "{{ '%02d' | format(agent_number) }}"
+  loop: "{{ range(1, teamcity_number_of_agents + 1, 1) | list }}"
+  loop_control:
+    loop_var: agent_number
