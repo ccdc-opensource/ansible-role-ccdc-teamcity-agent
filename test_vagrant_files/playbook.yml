@@ -5,4 +5,5 @@
       - ccdc-cpp-buildmachine-teamcity-agent
     vars:
       ccdc_cpp_production_buildmachine: False
+      teamcity_buildagent_drive: C
   
