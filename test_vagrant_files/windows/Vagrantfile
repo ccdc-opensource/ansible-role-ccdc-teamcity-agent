@@ -2,21 +2,20 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-    config.vm.define "vagrant-stage2-windows-2019"
+    config.vm.define "vagrant-stage2-windows-2019-teamcity-agent"
 
     # Basic settings
-    config.vm.hostname = "buildlocal"
+    config.vm.hostname = "tcagenttestwindows2019"
     config.vm.box = "ccdc-basebox/windows-2019"
     # Workaround for bug in artifactory not handling / in package names
     config.vm.box_url = "https://artifactory.ccdc.cam.ac.uk/api/vagrant/ccdc-vagrant-repo/ccdc-basebox%2Fwindows-2019"
 
-    # Turn on autologon after sysprep
-    config.vm.provision "shell", privileged: false, reboot: true, inline: <<-SHELL
-      Set-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" -Name AutoAdminLogon -Value 1
-      Set-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" -Name DefaultUserName -Value "vagrant"
-      Set-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" -Name DefaultPassword -Value "vagrant"
-      Remove-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" -Name AutoAdminLogonCount -Confirm -ErrorAction SilentlyContinue
-    SHELL
+    config.vm.provider :vmware_fusion do |v, override|
+        v.gui = true
+        v.vmx["memsize"] = "4096"
+        v.vmx["numvcpus"] = "4"
+        v.enable_vmrun_ip_lookup = false
+    end
 
     # Apply stage 2 ansible roles
     config.vm.provision "ansible" do |ansible|
