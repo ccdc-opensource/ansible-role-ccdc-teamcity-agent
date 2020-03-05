@@ -1,5 +1,6 @@
-test_vagrant_files/darwin/.vagrant/*
+test_vagrant_files/darwin/.vagrant
 test_vagrant_files/darwin/downloaded-roles
-test_vagrant_files/windows/.vagrant/*
+test_vagrant_files/windows/.vagrant
 test_vagrant_files/windows/downloaded-roles
-
+test_vagrant_files/centos/.vagrant
+test_vagrant_files/centos/downloaded-roles
