@@ -6,20 +6,18 @@
     java_distribution: adoptopenjdk
     java_major_version: 11
 
-- name: Install 7zip
-  win_chocolatey:
-    name: 7zip.install
-    state: present
-
 - name: Create teamcity agent install directory
-  win_file:
+  file:
     path: "{{ teamcity_agent_install_dir }}"
     state: directory
+    mode: '0755'
 
-- name: Download teamcity buildAgent.zip
-  win_get_url:
-    url: "{{ teamcity_server_url }}/update/buildAgent.zip"
+- name: Download Agent zip
+  get_url:
+    url: "{{ teamcity_buildagent_zip_url }}"
     dest: "{{ teamcity_downloaded_buildagent_zip }}"
+    mode: 0775
+  register: get_url_result
 
 - name: Install Build Agents
   include_tasks:

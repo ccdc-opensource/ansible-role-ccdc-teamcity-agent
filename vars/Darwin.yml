@@ -1,7 +1,4 @@
 ---
-teamcity_agent_install_dir: /Users/{{ teamcity_agent_account }}/teamcity
-teamcity_agent_hostname: build-mac-10.15
-local_buildagent_zip_path: /Users/{{ teamcity_agent_account }}/teamcity/buildagent-zip
-teamcity_agent_launchd_label: jetbrains.teamcity.BuildAgent
-teamcity_agent_launchd_filename: "/Users/{{ teamcity_agent_account }}/Library/LaunchAgents/jetbrains.teamcity.BuildAgent.plist"
-teamcity_agent_java_home_macos: /Library/Java/JavaVirtualMachines/adoptopenjdk-13.jdk/Contents/Home/
+teamcity_agent_install_dir: /Users/{{ teamcity_build_username }}/teamcity
+teamcity_agent_hostname: bld-macos
+teamcity_agent_java_home_macos: /Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home/

@@ -1,6 +1,0 @@
-$pass="{{ artefact_upload_password }}" | ConvertTo-SecureString -AsPlainText -Force
-$Cred = New-Object System.Management.Automation.PsCredential('{{ artefact_upload_user }}',$pass)
-
-New-PSDrive -name X -Root \\artefact.ccdc.cam.ac.uk\windows -Credential $cred -PSProvider filesystem
-
-&E:\teamcity-agent\bin\agent.bat start

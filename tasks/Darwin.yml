@@ -1,5 +1,10 @@
 ---
-- homebrew_tap:
+- name: Install homebrew
+  include_role:
+    name: geerlingguy.homebrew
+
+- name: Add AdoptOpenJDK/openjdk tap
+  homebrew_tap:
     name: AdoptOpenJDK/openjdk
     state: present
 
@@ -8,47 +13,29 @@
     name: adoptopenjdk11
     state: present
 
-- name: "Create Agent directory"
+- name: Create teamcity agent install directory
   file:
     path: "{{ teamcity_agent_install_dir }}"
     state: directory
-    mode: 0755
+    mode: '0755'
 
-- name: "Download and extract Agent package"
-  unarchive:
-    src: "{{ teamcity_server_url }}/update/buildAgent.zip"
-    dest: "{{ teamcity_agent_install_dir }}"
-    remote_src: yes
-    validate_certs: no
+- name: Download Agent zip
+  get_url:
+    url: "{{ teamcity_buildagent_zip_url }}"
+    dest: "{{ teamcity_downloaded_buildagent_zip }}"
+    mode: 0775
 
-- name: "Save agent auth token"
-  shell: "grep authorizationToken {{ teamcity_agent_install_dir }}/conf/buildAgent.properties | sed 's/authorizationToken=//g'"
-  changed_when: no
-  register: _teamcity_agent_token
-
-- name: "Add TeamCity Agent configuration"
-  template:
-    src: "buildAgent.properties.j2"
-    dest: "{{ teamcity_agent_install_dir }}/conf/buildAgent.properties"
-    mode: 0644
-
-- name: "Create log dir"
-  file:
-    path: "{{ teamcity_agent_install_dir }}/logs"
-    state: directory
-    mode: 0755
-
-- name: "Create LaunchAgents directory"
+- name: "Ensure LaunchAgents directory exists"
   file:
     path: "{{ ansible_env.HOME }}/Library/LaunchAgents/"
     state: directory
     mode: 0755
 
-- name: "Add TeamCity launchd service file"
-  template:
-    src: jetbrains.teamcity.BuildAgent.plist.j2
-    dest: "{{ teamcity_agent_launchd_filename }}"
-    mode: 0644
-
-- name: "launchctl load buildagent"
-  command: launchctl load "{{teamcity_agent_launchd_filename}}"
+- name: Install Build Agents
+  include_tasks:
+    file: "single_build_agent.yml"
+  vars:
+    agent_number_formatted: "{{ '%02d' | format(agent_number) }}"
+  loop: "{{ range(1, teamcity_number_of_agents + 1, 1) | list }}"
+  loop_control:
+    loop_var: agent_number
