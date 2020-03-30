@@ -1,5 +1,5 @@
 ---
-teamcity_server_url: http://ci01.ccdc.cam.ac.uk
+teamcity_server_url: https://teamcity.ccdc.cam.ac.uk
 teamcity_build_username: vagrant
 teamcity_build_user_password: vagrant
 teamcity_downloaded_buildagent_zip: "{{ teamcity_agent_install_dir }}/teamcity-agent.zip"
