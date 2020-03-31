@@ -7,6 +7,9 @@ After=network.target
 [Service]
 Type=simple
 
+# Use XDummy server on linux systems
+Environment="DISPLAY=:77"
+
 # Support agent upgrade as the main process starts a child and exits then
 RemainAfterExit=yes
 # Support agent upgrade as the main process gets SIGTERM during upgrade and that maps to exit code 143
