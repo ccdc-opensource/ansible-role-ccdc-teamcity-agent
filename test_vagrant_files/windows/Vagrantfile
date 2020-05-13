@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
 
     config.vm.box = "ccdc-basebox/windows-2019"
     # Workaround for bug in artifactory not handling / in package names
-    config.vm.box_url = "https://artifactory.ccdc.cam.ac.uk/api/vagrant/ccdc-vagrant-repo/ccdc-basebox%2Fwindows-2019"
+    config.vm.box_url = "https://vagrant:***REMOVED***@artifactory.ccdc.cam.ac.uk/artifactory/api/vagrant/ccdc-vagrant-repo/ccdc-basebox%2Fwindows-2019"
 
     config.vm.provider :virtualbox do |v, override|
         v.gui = true
