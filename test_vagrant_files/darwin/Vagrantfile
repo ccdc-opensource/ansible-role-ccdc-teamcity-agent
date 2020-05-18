@@ -1,13 +1,22 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+variables = %w{ARTIFACTORY_API_KEY ATLAS_TOKEN VAGRANT_SERVER_URL}
+missing = variables.find_all { |v| ENV[v] == nil }
+unless missing.empty?
+  puts "FATAL: The following environment variables are missing and are needed to run this script: #{missing.join(', ')}."
+  puts "See https://confluence.ccdc.cam.ac.uk/x/oK7I for instructions on obtaining an artifactory API key and atlas token"
+  puts "Make sure export VAGRANT_SERVER_URL='https://artifactory.ccdc.cam.ac.uk/artifactory/api/vagrant/ccdc-vagrant-repo' is present in your .bashrc"
+  exit
+end
+
 Vagrant.configure("2") do |config|
     config.vm.define "tctest-macos"
     config.vm.hostname = "tctest-macos"
     
     config.vm.box = "ccdc-basebox/macosx-10.15"
     # Workaround for bug in artifactory not handling / in package names
-    config.vm.box_url = "https://vagrant:***REMOVED***@artifactory.ccdc.cam.ac.uk/artifactory/api/vagrant/ccdc-vagrant-repo/ccdc-basebox%2Fmacosx-10.15"
+    config.vm.box_url = "https://artifactory.ccdc.cam.ac.uk/artifactory/api/vagrant/ccdc-vagrant-repo/ccdc-basebox%2Fmacosx-10.15"
 
     config.vm.provider :vmware_fusion do |v, override|
         v.gui = true
