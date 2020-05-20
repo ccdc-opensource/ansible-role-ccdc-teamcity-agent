@@ -3,7 +3,7 @@
 
 # Setup variables for single agent
 
-- set_fact: teamcity_single_agent_hostname="{{ ansible_hostname }}"
+- set_fact: teamcity_single_agent_hostname="{{ inventory_hostname }}"
 
 - set_fact: teamcity_single_agent_name="{{ teamcity_single_agent_hostname }}-{{ agent_number_formatted }}"
 
