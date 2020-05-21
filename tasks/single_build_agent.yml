@@ -46,13 +46,13 @@
 - name: "Agent {{ teamcity_single_agent_name }} -- Read existing configuration"
   slurp:
     src: "{{ teamcity_single_agent_install_dir }}/conf/buildAgent.properties"
-  register: teamcity_single_agent_current_config
+  register: teamcity_single_agent_current_config_windows
   when: ansible_os_family == "Windows" and teamcity_single_agent_current_config_file_windows.stat.exists
 
 - name: "Agent {{ teamcity_single_agent_name }} -- Read existing configuration"
   slurp:
     src: "{{ teamcity_single_agent_install_dir }}/conf/buildAgent.properties"
-  register: teamcity_single_agent_current_config
+  register: teamcity_single_agent_current_config_posix
   when: ansible_os_family != "Windows" and teamcity_single_agent_current_config_file_non_windows.stat.exists
 
 - name: "Agent {{ teamcity_single_agent_name }} -- Extract buildAgent.zip (Windows)"
@@ -72,7 +72,7 @@
     src: "buildAgent.properties.j2"
     dest: "{{ teamcity_single_agent_install_dir }}/conf/buildAgent.properties"
   vars:
-    _teamcity_agent_token: "{{ teamcity_single_agent_current_config['content'] | default('') | b64decode | regex_findall('authorizationToken=(.+)') | first | default('') }}"
+    _teamcity_agent_token: "{{ teamcity_single_agent_current_config_windows['content'] | default('') | b64decode | regex_findall('authorizationToken=(.+)') | first | default('') }}"
   when: ansible_os_family == "Windows"
 
 - name: "Agent {{ teamcity_single_agent_name }} -- Setup buildAgent.properties (Non Windows)"
@@ -80,7 +80,7 @@
     src: "buildAgent.properties.j2"
     dest: "{{ teamcity_single_agent_install_dir }}/conf/buildAgent.properties"
   vars:
-    _teamcity_agent_token: "{{ teamcity_single_agent_current_config['content'] | default('') | b64decode | regex_findall('authorizationToken=(.+)') | first | default('') }}"
+    _teamcity_agent_token: "{{ teamcity_single_agent_current_config_posix['content'] | default('') | b64decode | regex_findall('authorizationToken=(.+)') | first | default('') }}"
   when: ansible_os_family != "Windows"
 
 - name: "Agent {{ teamcity_single_agent_name }} -- Change ownership of all Build Agent files to {{ teamcity_build_username }} (Windows)"
