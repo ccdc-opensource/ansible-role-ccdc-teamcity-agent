@@ -2,9 +2,10 @@
 dependencies: []
 
 galaxy_info:
-  author: cbantaloukas@ccdc.cam.ac.uk
+role_name: teamcity_agent
+  author: rockdreamer
   description: TeamCity agent setup (multiple agents per machine).
-  company: "CCDC"
+  company: The Cambridge Crystallographic Data Centre
   license: "license (BSD, MIT)"
   min_ansible_version: 2.9
   platforms:

@@ -5,7 +5,7 @@ variables = %w{ARTIFACTORY_API_KEY ATLAS_TOKEN VAGRANT_SERVER_URL}
 missing = variables.find_all { |v| ENV[v] == nil }
 unless missing.empty?
   puts "FATAL: The following environment variables are missing and are needed to run this script: #{missing.join(', ')}."
-  puts "See https://confluence.ccdc.cam.ac.uk/x/oK7I for instructions on obtaining an artifactory API key and atlas token"
+  puts "See https://ccdc-cambridge.atlassian.net/l/c/W0YRZXRf for instructions on obtaining an artifactory API key and atlas token"
   puts "Make sure export VAGRANT_SERVER_URL='https://artifactory.ccdc.cam.ac.uk/artifactory/api/vagrant/ccdc-vagrant-repo' is present in your .bashrc"
   exit
 end

@@ -28,7 +28,7 @@ None.
 
     - hosts: all
       roles:
-        - ccdc-cpp-buildmachine-teamcity-agent
+        - ccdc.teamcity_agent
 
 ## License
 

@@ -2,7 +2,7 @@
   - hosts: all
     gather_facts: yes
     roles:
-      - ccdc-cpp-buildmachine-teamcity-agent
+      - ccdc.teamcity_agent
     vars:
       ccdc_cpp_production_buildmachine: False
       teamcity_buildagent_drive: C
