@@ -3,6 +3,7 @@ dependencies: []
 
 galaxy_info:
   role_name: teamcity_agent
+  namespace: ccdc
   author: rockdreamer
   description: TeamCity agent setup (multiple agents per machine).
   company: The Cambridge Crystallographic Data Centre
@@ -21,7 +22,7 @@ galaxy_info:
     - name: Ubuntu
       versions:
         - all
-    - name: Darwin
+    - name: MacOSX
       versions:
         - all
     - name: Windows
