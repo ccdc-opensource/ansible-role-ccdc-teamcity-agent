@@ -3,15 +3,20 @@
 
 # Setup variables for single agent
 
-- set_fact: teamcity_single_agent_hostname="{{ inventory_hostname }}"
+- name: read agent hostname
+  set_fact: teamcity_single_agent_hostname="{{ inventory_hostname }}"
 
-- set_fact: teamcity_single_agent_name="{{ teamcity_single_agent_hostname }}-{{ agent_number_formatted }}"
+- name: read agent name
+  set_fact: teamcity_single_agent_name="{{ teamcity_single_agent_hostname }}-{{ agent_number_formatted }}"
 
-- set_fact: teamcity_single_agent_install_dir="{{ teamcity_agent_install_dir }}/{{ teamcity_single_agent_name }}"
+- name: calculate installation directory for agent
+  set_fact: teamcity_single_agent_install_dir="{{ teamcity_agent_install_dir }}/{{ teamcity_single_agent_name }}"
 
-- set_fact: teamcity_single_agent_launchd_label="jetbrains.teamcity.BuildAgent.{{teamcity_single_agent_name}}"
+- name: calculate macos launchd label for agent
+  set_fact: teamcity_single_agent_launchd_label="jetbrains.teamcity.BuildAgent.{{ teamcity_single_agent_name }}"
 
-- set_fact: teamcity_single_agent_launchd_filename="/Users/{{ teamcity_build_username }}/Library/LaunchAgents/{{teamcity_single_agent_launchd_label}}.plist"
+- name: calculate macos launchd unit file
+  set_fact: teamcity_single_agent_launchd_filename="/Users/{{ teamcity_build_username }}/Library/LaunchAgents/{{ teamcity_single_agent_launchd_label }}.plist"
 
 # Create directories
 
@@ -26,7 +31,7 @@
     path: "{{ teamcity_single_agent_install_dir }}"
     state: directory
     mode: 0775
-    recurse: yes
+    recurse: true
   when: ansible_os_family != "Windows"
 
 # Check if the configuration is there. If so avoid unzipping the buildagent.zip file
@@ -64,7 +69,7 @@
     src: "{{ teamcity_downloaded_buildagent_zip }}"
     dest: "{{ teamcity_single_agent_install_dir }}"
     creates: "{{ teamcity_single_agent_install_dir }}/bin/agent.sh"
-    remote_src: yes
+    remote_src: true
   when: ansible_os_family != "Windows" and not teamcity_single_agent_current_config_file_non_windows.stat.exists
 
 - name: "Agent {{ teamcity_single_agent_name }} -- Setup buildAgent.properties (Windows)"
@@ -79,6 +84,7 @@
   template:
     src: "buildAgent.properties.j2"
     dest: "{{ teamcity_single_agent_install_dir }}/conf/buildAgent.properties"
+    mode: u=rw,g=r,o=r
   vars:
     _teamcity_agent_token: "{{ teamcity_single_agent_current_config_posix['content'] | default('') | b64decode | regex_findall('authorizationToken=(.+)') | first | default('') }}"
   when: ansible_os_family != "Windows"
@@ -87,7 +93,7 @@
   win_owner:
     path: "{{ teamcity_single_agent_install_dir }}"
     user: "{{ teamcity_build_username }}"
-    recurse: yes
+    recurse: true
   when: ansible_os_family == "Windows"
 
 - name: "Agent {{ teamcity_single_agent_name }} -- Give {{ teamcity_build_username }} full control on files (Windows)"
@@ -105,7 +111,7 @@
   file:
     path: "{{ teamcity_single_agent_install_dir }}"
     owner: "{{ teamcity_build_username }}"
-    recurse: yes
+    recurse: true
   when: ansible_os_family != "Windows"
 
 # Enable service on Linux systems with systemd
@@ -113,22 +119,23 @@
   template:
     src: "teamcity-agent.service.j2"
     dest: "/etc/systemd/system/teamcity-{{ teamcity_single_agent_name }}.service"
-  become: yes
+    mode: u=rw,g=r,o=r
+  become: true
   register: teamcity_single_agent_unit
   when: ansible_os_family in ['Debian', 'RedHat']
 
 - name: "Agent {{ teamcity_single_agent_name }} -- Force systemd to reread configs"
   systemd:
-    daemon_reload: yes
-  become: yes
+    daemon_reload: true
+  become: true
   when: ansible_os_family in ['Debian', 'RedHat'] and teamcity_single_agent_unit.changed
 
 - name: "Agent {{ teamcity_single_agent_name }} -- Start agent"
   service:
     name: "teamcity-{{ teamcity_single_agent_name }}"
     state: started
-    enabled: yes
-  become: yes
+    enabled: true
+  become: true
   when: ansible_os_family in ['Debian', 'RedHat']
 
 # Enable service on MacOs
@@ -141,7 +148,7 @@
   when: ansible_os_family == 'Darwin'
 
 - name: "Agent {{ teamcity_single_agent_name }} -- Launchctl load service"
-  command: launchctl load "{{teamcity_single_agent_launchd_filename}}"
+  command: launchctl load "{{ teamcity_single_agent_launchd_filename }}"
   when: ansible_os_family == 'Darwin' and teamcity_single_agent_launchd_service.changed
 
 # Enable service on Windows using task scheduler
@@ -149,19 +156,19 @@
   win_scheduled_task:
     name: "TeamCity-{{ teamcity_single_agent_name }}"
     description: "Start the Teamcity agent in {{ teamcity_single_agent_install_dir }}"
-    enabled: yes
+    enabled: true
     logon_type: interactive_token
-#    run_level: highest
+    #    run_level: highest
     restart_count: 10000000
     execution_time_limit: PT0S
-    start_when_available: yes
+    start_when_available: true
     path: \TCAgents
     actions:
       - path: bin\agent.bat
         arguments: start
         working_directory: "{{ teamcity_single_agent_install_dir }}"
     triggers:
-      - enabled: yes
+      - enabled: true
         type: logon
         user_id: "{{ teamcity_build_username }}"
     username: "{{ teamcity_build_username }}"
