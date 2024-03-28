@@ -1,17 +1,15 @@
 ---
-- name: Install homebrew
-  include_role:
-    name: geerlingguy.homebrew
 
-- name: Add AdoptOpenJDK/openjdk tap
-  homebrew_tap:
-    name: AdoptOpenJDK/openjdk
-    state: present
-
-- name: Install adoptopenjdk for teamcity agent on MacOS
-  homebrew_cask:
-    name: adoptopenjdk11
-    state: present
+- name: Insall Homebrew + openjdk
+  ansible.builtin.include_role:
+    name: geerlingguy.mac.homebrew
+  vars:
+    # This is overwritten by our group_vars (cpp.build-machines)
+    homebrew_taps:
+      - name: AdoptOpenJDK/openjdk 
+    homebrew_installed_packages:
+      - adoptopenjdk11
+  when: not cpp_buildmachine
 
 - name: Create teamcity agent install directory
   file:
