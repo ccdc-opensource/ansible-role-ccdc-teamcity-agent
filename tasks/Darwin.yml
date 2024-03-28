@@ -23,14 +23,12 @@
     dest: "{{ teamcity_downloaded_buildagent_zip }}"
     mode: 0775
 
-- name: home pls
-  debug: var=ansible_env.HOME
-
 - name: "Ensure LaunchAgents directory exists"
   file:
     path: "{{ ansible_env.HOME }}/Library/LaunchAgents/"
     state: directory
     mode: 0755
+  become: no
 
 - name: Install Build Agents
   include_tasks:
