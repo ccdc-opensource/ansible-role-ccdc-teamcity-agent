@@ -22,7 +22,16 @@
     url: "{{ teamcity_buildagent_zip_url }}"
     dest: "{{ teamcity_downloaded_buildagent_zip }}"
     mode: 0775
-
+    
+- name: register home path
+  command: echo "{{ ansible_env.HOME }}"
+  register: path
+  
+- name: info 
+  ansible.builtin.debug:
+    var: path
+    verbosity: 2
+    
 - name: "Ensure LaunchAgents directory exists"
   file:
     path: "{{ ansible_env.HOME }}/Library/LaunchAgents/"
