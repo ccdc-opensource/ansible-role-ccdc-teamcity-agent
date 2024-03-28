@@ -29,7 +29,7 @@
     state: directory
     mode: 0755
   become: true
-  become_user: "{{ ansible_ssh_user }}"
+  become_user: "{{ teamcity_build_username }}"
     
 
 - name: Install Build Agents
