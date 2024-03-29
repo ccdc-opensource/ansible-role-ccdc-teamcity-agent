@@ -25,12 +25,9 @@
 
 - name: "Ensure LaunchAgents directory exists"
   file:
-    path: "{{ ansible_env.HOME }}/Library/LaunchAgents/"
+    path: /Users/{{ teamcity_build_username }}/Library/LaunchAgents/"
     state: directory
     mode: 0755
-  become: true
-  become_user: "{{ teamcity_build_username }}"
-    
 
 - name: Install Build Agents
   include_tasks:
