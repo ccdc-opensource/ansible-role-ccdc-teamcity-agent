@@ -6,7 +6,7 @@
   vars:
     # This is overwritten by our group_vars (cpp.build-machines)
     homebrew_installed_packages:
-      - openjdk@21
+      - openjdk@17
   when: not cpp_buildmachine
   
 - name: setup java
