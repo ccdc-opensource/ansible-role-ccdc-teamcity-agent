@@ -10,7 +10,7 @@
   when: not cpp_buildmachine
   
 - name: setup java
-  command: ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+  ansible.builtin.command: ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
   become: true
 
 - name: Create teamcity agent install directory
