@@ -19,6 +19,7 @@
     state: directory
     mode: "0755"
     owner: "{{ teamcity_build_username }}"
+    recurse: true
 
 - name: Download Agent zip
   ansible.builtin.get_url:
