@@ -33,11 +33,22 @@
     mode: 0755
     owner: "{{ teamcity_build_username }}"
 
-- name: Install Build Agents
-  include_tasks:
-    file: "single_build_agent.yml"
-  vars:
-    agent_number_formatted: "{{ '%02d' | format(agent_number) }}"
-  loop: "{{ range(1, teamcity_number_of_agents + 1, 1) | list }}"
-  loop_control:
-    loop_var: agent_number
+- name: Install Teamcity Agent
+  ansible.builtin.include_tasks:
+     file: install_agent.yml
+
+
+# Setup service to run agent 
+
+- name: "Deploy TeamCity launchd service"
+  template:
+    src: jetbrains.teamcity.BuildAgent.plist.j2
+    dest: "/Users/{{ teamcity_build_username }}/Library/LaunchAgents/jetbrains.teamcity.BuildAgent.{{ item.teamcity_agent_name }}.plist"
+    mode: 0644
+  register: teamcity_single_agent_launchd_service
+  loop: "{{ teamcity_agents }}"
+
+- name: "Launchctl load service"
+  command: launchctl load "/Users/{{ teamcity_build_username }}/Library/LaunchAgents/jetbrains.teamcity.BuildAgent.{{ item.teamcity_agent_name }}.plist"
+  when: ansible_os_family == 'Darwin' and teamcity_single_agent_launchd_service.changed
+  loop: "{{ teamcity_agents }}"

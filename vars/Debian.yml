@@ -1,3 +1,2 @@
 ---
 teamcity_agent_install_dir: /home/{{ teamcity_build_username }}/teamcity
-teamcity_agent_hostname: bld-ubuntu

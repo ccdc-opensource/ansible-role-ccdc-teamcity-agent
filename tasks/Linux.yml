@@ -5,7 +5,7 @@
   vars:
     java_distribution: adoptopenjdk
     java_major_version: 11
-
+    
 - name: Create teamcity agent install directory
   file:
     path: "{{ teamcity_agent_install_dir }}"
@@ -17,13 +17,7 @@
     url: "{{ teamcity_buildagent_zip_url }}"
     dest: "{{ teamcity_downloaded_buildagent_zip }}"
     mode: 0775
-  register: get_url_result
 
-- name: Install Build Agents
-  include_tasks:
-    file: "single_build_agent.yml"
-  vars:
-    agent_number_formatted: "{{ '%02d' | format(agent_number) }}"
-  loop: "{{ range(1, teamcity_number_of_agents + 1, 1) | list }}"
-  loop_control:
-    loop_var: agent_number
+- name: Install Teamcity Agent
+  ansible.builtin.include_tasks:
+     file: install_agent.yml

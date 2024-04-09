@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>WorkingDirectory</key>
-	<string>{{ teamcity_single_agent_install_dir }}</string>
+	<string>{{ teamcity_agent_install_dir }}</string>
 	<key>Debug</key>
 	<false/>
 	<key>Label</key>
-	<string>{{ teamcity_single_agent_launchd_label }}</string>
+	<string>jetbrains.teamcity.BuildAgent.{{ item.teamcity_agent_name }}</string>
 	<key>OnDemand</key>
 	<false/>
 	<key>KeepAlive</key>

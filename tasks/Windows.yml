@@ -1,31 +1,56 @@
 ---
-- name: Install Java
-  include_role:
-    name: lean_delivery.java
-  vars:
-    java_distribution: adoptopenjdk
-    java_major_version: 11
+# Install Windows Teamcity Agent
 
-- name: Install 7zip
-  win_chocolatey:
-    name: 7zip.install
-    state: present
-
-- name: Create teamcity agent install directory
+- name: "Ensure install directory for {{ teamcity_single_agent_name }} exists (Windows)"
   win_file:
-    path: "{{ teamcity_agent_install_dir }}"
+    path: "{{ teamcity_single_agent_install_dir }}"
     state: directory
+  loop: "{{ teamcity_agents }}"
 
-- name: Download teamcity buildAgent.zip
-  win_get_url:
-    url: "{{ teamcity_server_url }}/update/buildAgent.zip"
-    dest: "{{ teamcity_downloaded_buildagent_zip }}"
+- name: "Agent {{ teamcity_single_agent_name }} -- Check for existing configuration (Windows)"
+  win_stat:
+    path: "{{ teamcity_single_agent_install_dir }}/conf/buildAgent.properties"
+  register: teamcity_single_agent_current_config_file_windows
 
-- name: Install Build Agents
-  include_tasks:
-    file: "single_build_agent.yml"
+- name: "Agent {{ teamcity_single_agent_name }} -- Extract buildAgent.zip (Windows)"
+  win_shell: 7z x -aoa -mmt=on "{{ teamcity_downloaded_buildagent_zip }}" -o"{{ teamcity_single_agent_install_dir }}"
+  when: not teamcity_single_agent_current_config_file_windows.stat.exists
+
+- name: "Agent {{ teamcity_single_agent_name }} -- Setup buildAgent.properties (Windows)"
+  win_template:
+    src: "buildAgent.properties.j2"
+    dest: "{{ teamcity_single_agent_install_dir }}/conf/buildAgent.properties"
   vars:
-    agent_number_formatted: "{{ '%02d' | format(agent_number) }}"
-  loop: "{{ range(1, teamcity_number_of_agents + 1, 1) | list }}"
-  loop_control:
-    loop_var: agent_number
+    _teamcity_agent_token: "{{ teamcity_single_agent_current_config_windows['content'] | default('') | b64decode | regex_findall('authorizationToken=(.+)') | first | default('') }}"
+
+- name: "Agent {{ teamcity_single_agent_name }} -- Change ownership of all Build Agent files to {{ teamcity_build_username }} (Windows)"
+  win_owner:
+    path: "{{ teamcity_single_agent_install_dir }}"
+    user: "{{ teamcity_build_username }}"
+    recurse: true
+
+- name: "Agent {{ teamcity_single_agent_name }} -- Give {{ teamcity_build_username }} full control on files (Windows)"
+  win_acl:
+    user: "{{ teamcity_build_username }}"
+    path: "{{ teamcity_single_agent_install_dir }}"
+    rights: FullControl
+    type: allow
+    state: present
+    propagation: InheritOnly
+    inherit: ContainerInherit, ObjectInherit
+
+# Enable TC Agent Service
+
+- name: "Agent {{ teamcity_single_agent_name }} -- Setup buildAgent.properties (Windows)"
+  win_template:
+    src: "wrapper.conf.j2"
+    dest: "{{ teamcity_single_agent_install_dir }}/launcher/conf"
+  loop: "{{ teamcity_agents }}"
+
+- name: Install Agent Service
+  win_shell: "{{ teamcity_agent_install_dir}}/bin/service.install.bat"
+  loop: "{{ teamcity_agents }}"
+
+- name: Start windows service
+  win_shell: "{{ teamcity_agent_install_dir}}/bin/service.start.bat"
+  loop: "{{ teamcity_agents }}"
