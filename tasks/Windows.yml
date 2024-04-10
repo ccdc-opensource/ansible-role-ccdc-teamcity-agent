@@ -48,9 +48,9 @@
   loop: "{{ teamcity_agents }}"
 
 - name: Install Agent Service
-  win_shell: "{{ teamcity_agent_install_dir}}/bin/service.install.bat"
+  win_shell: "{{ teamcity_agent_install_dir }}/bin/service.install.bat"
   loop: "{{ teamcity_agents }}"
 
 - name: Start windows service
-  win_shell: "{{ teamcity_agent_install_dir}}/bin/service.start.bat"
+  win_shell: "{{ teamcity_agent_install_dir }}/bin/service.start.bat"
   loop: "{{ teamcity_agents }}"
