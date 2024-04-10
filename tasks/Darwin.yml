@@ -8,7 +8,7 @@
     homebrew_installed_packages:
       - openjdk@17
   when: not cpp_buildmachine
-  
+
 - name: Symlink OpenJDK to system-wide Java VMs
   ansible.builtin.file:
     state: link
@@ -40,17 +40,15 @@
   ansible.builtin.include_tasks:
     file: install_agent.yml
 
-# Setup service to run agent 
-
 - name: "Deploy TeamCity launchd service"
-  template:
+  ansible.builtin.template:
     src: jetbrains.teamcity.BuildAgent.plist.j2
     dest: "/Users/{{ teamcity_build_username }}/Library/LaunchAgents/jetbrains.teamcity.BuildAgent.{{ item.teamcity_agent_name }}.plist"
     mode: 0644
   register: teamcity_single_agent_launchd_service
   loop: "{{ teamcity_agents }}"
 
-- name: "Launchctl load service"
-  command: launchctl load "/Users/{{ teamcity_build_username }}/Library/LaunchAgents/jetbrains.teamcity.BuildAgent.{{ item.teamcity_agent_name }}.plist"
+- name: "Run TeamCity launchd service"  # noqa: no-changed-when
+  ansible.builtin.command: launchctl load "/Users/{{ teamcity_build_username }}/Library/LaunchAgents/jetbrains.teamcity.BuildAgent.{{ item.teamcity_agent_name }}.plist"
   when: ansible_os_family == 'Darwin' and teamcity_single_agent_launchd_service.changed
   loop: "{{ teamcity_agents }}"
