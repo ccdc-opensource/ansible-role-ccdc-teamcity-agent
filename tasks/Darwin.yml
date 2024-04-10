@@ -1,6 +1,6 @@
 ---
 
-- name: Insall Homebrew + openjdk
+- name: Insatll Homebrew + OpenJDK
   ansible.builtin.include_role:
     name: geerlingguy.mac.homebrew
   vars:
@@ -9,8 +9,11 @@
       - openjdk@17
   when: not cpp_buildmachine
   
-- name: setup java
-  ansible.builtin.command: ln -sfn /usr/local/opt/openjdk@17/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-17.jdk
+- name: Symlink OpenJDK to system-wide Java VMs
+  ansible.builtin.file:
+    state: link
+    src: /usr/local/opt/openjdk@17/libexec/openjdk.jdk
+    dest: /Library/Java/JavaVirtualMachines/openjdk-17.jdk
   become: true
 
 - name: Create teamcity agent install directory
@@ -36,7 +39,6 @@
 - name: Install Teamcity Agent
   ansible.builtin.include_tasks:
      file: install_agent.yml
-
 
 # Setup service to run agent 
 
