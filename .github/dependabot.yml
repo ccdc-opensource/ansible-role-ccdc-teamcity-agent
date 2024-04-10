@@ -25,7 +25,7 @@ registries:
     password: ${{ secrets.ARTIFACTORY_GH_NPM_READ_ONLY_API }}
   npm-azure-devops:
     type: nuget-feed
-    url: https://pkgs.dev.azure.com/ccdc/_packaging/ccdc/npm/registry/ 
+    url: https://pkgs.dev.azure.com/ccdc/_packaging/ccdc/npm/registry/
     username: ${{ secrets.AZURE_NPM_ARTIFACTS_READ_ONLY_USER }}
     password: ${{ secrets.AZURE_NPM_ARTIFACTS_READ_ONLY_TOKEN }}
   npm-public:
