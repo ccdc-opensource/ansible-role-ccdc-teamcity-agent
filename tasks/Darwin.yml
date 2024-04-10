@@ -38,7 +38,7 @@
 
 - name: Install Teamcity Agent
   ansible.builtin.include_tasks:
-     file: install_agent.yml
+    file: install_agent.yml
 
 # Setup service to run agent 
 
