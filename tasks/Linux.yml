@@ -1,19 +1,19 @@
 ---
 - name: Install Java
-  include_role:
+  ansible.builtin.include_role:
     name: lean_delivery.java
   vars:
     java_distribution: adoptopenjdk
     java_major_version: 11
 
 - name: Create teamcity agent install directory
-  file:
+  ansible.builtin.file:
     path: "{{ teamcity_agent_install_dir }}"
     state: directory
     mode: "0755"
 
 - name: Download Agent zip
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ teamcity_buildagent_zip_url }}"
     dest: "{{ teamcity_downloaded_buildagent_zip }}"
     mode: 0775
