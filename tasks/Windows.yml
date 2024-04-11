@@ -1,6 +1,23 @@
 ---
 # Install Windows Teamcity Agent
 
+- name: Install 7zip + Java # noqa: name[template]
+  win_chocolatey:
+    name: 
+      - 7zip.install
+      - microsoft-openjdk17
+    state: present
+
+- name: Create teamcity agent install directory  # noqa: name[template]
+  win_file:
+    path: "{{ teamcity_agent_install_dir }}"
+    state: directory
+
+- name: Download teamcity buildAgent.zip  # noqa: name[template]
+  win_get_url:
+    url: "{{ teamcity_server_url }}/update/buildAgent.zip"
+    dest: "{{ teamcity_downloaded_buildagent_zip }}"
+
 - name: "Ensure install directory exists (Windows)"  # noqa: name[template]
   ansible.windows.win_file:
     path: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}"
