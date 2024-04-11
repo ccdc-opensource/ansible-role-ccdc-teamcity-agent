@@ -3,21 +3,21 @@
 
 - name: "Ensure install directory exists (Windows)"  # noqa: name[template]
   ansible.windows.win_file:
-    path: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}"
+    path: "{{ teamcity_agent_install_dir }}\{{ item.teamcity_agent_name }}"
     state: directory
   loop: "{{ teamcity_agents }}"
 
 - name: "Check for existing configuration (Windows)"  # noqa: name[template]
   ansible.windows.win_stat:
-    path: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\conf\\buildAgent.properties"
+    path: "{{ teamcity_agent_install_dir }}\{{ item.teamcity_agent_name }}\confansible\buildAgent.properties"
   register: teamcity_agent_current_config_file
   loop: "{{ teamcity_agents }}"
 
 - name: "Extract buildAgent.zip (Windows)"  # noqa: name[template]
-  ansible.windows.win_unzip:
+  community.windows.win_unzip:
     src: "{{ teamcity_downloaded_buildagent_zip }}"
-    dest: "{{ teamcity_agent_install_dir }}\\{{ item.item.teamcity_agent_name }}"
-    creates: "{{ teamcity_agent_install_dir }}\\{{ item.item.teamcity_agent_name }}\\bin\\agent.bat"
+    dest: "{{ teamcity_agent_install_dir }}\{{ item.item.teamcity_agent_name }}"
+    creates: "{{ teamcity_agent_install_dir }}\{{ item.item.teamcity_agent_name }}\bin\agent.bat"
   when:
     - not item.stat.exists
   loop: "{{ teamcity_agent_current_config_file.results }}"
@@ -25,7 +25,7 @@
 - name: "Setup buildAgent.properties (Windows)"  # noqa: name[template]
   ansible.windows.win_template:
     src: "buildAgent.properties.j2"
-    dest: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\conf\\buildAgent.properties"
+    dest: "{{ teamcity_agent_install_dir }}\{{ item.teamcity_agent_name }}\conf\buildAgent.properties"
   loop: "{{ teamcity_agents }}"
 
 - name: "Change ownership of all Build Agent files"  # noqa: name[template]
@@ -48,13 +48,13 @@
 - name: "Setup wrapper.conf (Windows)"  # noqa: name[template]
   ansible.windows.win_template:
     src: "wrapper.conf.j2"
-    dest: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\launcher\\conf"
+    dest: "{{ teamcity_agent_install_dir }}\{{ item.teamcity_agent_name }}\launcher\conf"
   loop: "{{ teamcity_agents }}"
 
 - name: Install agent Service
-  ansible.windows.win_shell: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\bin\\service.install.bat"
+  ansible.windows.win_shell: "{{ teamcity_agent_install_dir }}\{{ item.teamcity_agent_name }}\bin\service.install.bat"
   loop: "{{ teamcity_agents }}"
 
 - name: Start agent service
-  ansible.windows.win_shell: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\bin\\service.start.bat"
+  ansible.windows.win_shell: "{{ teamcity_agent_install_dir }}\{{ item.teamcity_agent_name }}\bin\service.start.bat"
   loop: "{{ teamcity_agents }}"
