@@ -126,7 +126,7 @@ wrapper.ntservice.starttype=AUTO_START
 wrapper.ntservice.interactive=true
 
 # User Account running the server
-wrapper.ntservice.account=
+wrapper.ntservice.account="{{ teamcity_build_username }}"
 
 # User Account Password running the service
-wrapper.ntservice.password=
+wrapper.ntservice.password="{{ teamcity_build_user_password }}"
