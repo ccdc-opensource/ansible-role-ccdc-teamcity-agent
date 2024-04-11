@@ -1,15 +1,15 @@
 ---
 # Install Windows Teamcity Agent
 
-- name: "Ensure install directory for {{ teamcity_single_agent_name }} exists (Windows)"  # noqa: name[template]
+- name: "Ensure install directory exists (Windows)"  # noqa: name[template]
   ansible.windows.win_file:
-    path: "{{ teamcity_single_agent_install_dir }}"
+    path: "{{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}"
     state: directory
   loop: "{{ teamcity_agents }}"
 
 - name: "Check for existing configuration (Windows)"  # noqa: name[template]
   ansible.windows.win_stat:
-    path: "{{ teamcity_single_agent_install_dir }}/conf/buildAgent.properties"
+    path: "{{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}/conf/buildAgent.properties"
   register: teamcity_agent_current_config_file
   loop: "{{ teamcity_agents }}"
   
@@ -48,13 +48,13 @@
 - name: "Setup wrapper.conf (Windows)"  # noqa: name[template]
   ansible.windows.win_template:
     src: "wrapper.conf.j2"
-    dest: "{{ teamcity_single_agent_install_dir }}/launcher/conf"
+    dest: "{{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}/launcher/conf"
   loop: "{{ teamcity_agents }}"
 
 - name: Install agent Service
-  ansible.windows.win_shell: "{{ teamcity_agent_install_dir }}/bin/service.install.bat"
+  ansible.windows.win_shell: "{{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}/bin/service.install.bat"
   loop: "{{ teamcity_agents }}"
 
 - name: Start agent service
-  ansible.windows.win_shell: "{{ teamcity_agent_install_dir }}/bin/service.start.bat"
+  ansible.windows.win_shell: "{{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}/bin/service.start.bat"
   loop: "{{ teamcity_agents }}"
