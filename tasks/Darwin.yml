@@ -46,6 +46,7 @@
     owner: "{{ teamcity_build_username }}"
     recurse: true
   become: true
+  loop: "{{ teamcity_agents }}"
 
 - name: "Deploy TeamCity launchd service"
   ansible.builtin.template:
