@@ -36,7 +36,7 @@
 
 - name: "Change ownership of all Build Agent files"
   ansible.builtin.file:
-    path: "{{ teamcity_agent_install_dir }}"
+    path: "{{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}"
     owner: "{{ teamcity_build_username }}"
     recurse: true
   become: true
