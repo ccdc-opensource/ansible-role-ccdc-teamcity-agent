@@ -40,14 +40,6 @@
   ansible.builtin.include_tasks:
     file: install_agent.yml
 
-- name: "Change ownership of all Build Agent files"
-  ansible.builtin.file:
-    path: "{{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}"
-    owner: "{{ teamcity_build_username }}"
-    recurse: true
-  become: true
-  loop: "{{ teamcity_agents }}"
-
 - name: "Deploy TeamCity launchd service"
   ansible.builtin.template:
     src: jetbrains.teamcity.BuildAgent.plist.j2
@@ -59,4 +51,12 @@
 - name: "Run TeamCity launchd service"  # noqa: no-changed-when
   ansible.builtin.command: launchctl load "/Users/{{ teamcity_build_username }}/Library/LaunchAgents/jetbrains.teamcity.BuildAgent.{{ item.teamcity_agent_name }}.plist"
   when: ansible_os_family == 'Darwin' and teamcity_single_agent_launchd_service.changed
+  loop: "{{ teamcity_agents }}"
+
+- name: "Change ownership of all Build Agent files"
+  ansible.builtin.file:
+    path: "{{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}"
+    owner: "{{ teamcity_build_username }}"
+    recurse: true
+  become: true
   loop: "{{ teamcity_agents }}"
