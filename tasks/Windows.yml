@@ -14,7 +14,7 @@
   loop: "{{ teamcity_agents }}"
 
 - name: "Extract buildAgent.zip (Windows)"  # noqa: name[template]
-  ansible.windows.win_unzip:
+  community.windows.win_unzip:
     src: "{{ teamcity_downloaded_buildagent_zip }}"
     dest: "{{ teamcity_agent_install_dir }}/{{ item.item.teamcity_agent_name }}"
     creates: "{{ teamcity_agent_install_dir }}/{{ item.item.teamcity_agent_name }}/bin/agent.bat"
