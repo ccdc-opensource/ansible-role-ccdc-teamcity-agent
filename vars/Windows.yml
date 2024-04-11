@@ -1,3 +1,2 @@
 ---
 teamcity_agent_install_dir: "{{ teamcity_buildagent_drive }}:\\teamcity"
-teamcity_agent_hostname: bld-win2019
