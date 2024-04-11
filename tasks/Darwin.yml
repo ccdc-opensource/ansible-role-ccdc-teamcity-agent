@@ -40,6 +40,13 @@
   ansible.builtin.include_tasks:
     file: install_agent.yml
 
+- name: "Change ownership of all Build Agent files"
+  ansible.builtin.file:
+    path: "{{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}"
+    owner: "{{ teamcity_build_username }}"
+    recurse: true
+  become: true
+
 - name: "Deploy TeamCity launchd service"
   ansible.builtin.template:
     src: jetbrains.teamcity.BuildAgent.plist.j2
