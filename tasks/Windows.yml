@@ -69,7 +69,9 @@
   loop: "{{ teamcity_agents }}"
 
 - name: Install agent Service
-  ansible.windows.win_shell: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\bin\\service.install.bat"
+  ansible.windows.win_shell: "launcher\\bin\\TeamCityAgentService-windows-x86-32.exe -i launcher\\conf\\wrapper.conf"
+  args:
+    chdir: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}"
   loop: "{{ teamcity_agents }}"
 
 - name: Start agent service
