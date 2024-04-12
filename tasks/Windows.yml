@@ -79,4 +79,4 @@
   ansible.windows.win_service:
     name: "{{ item.teamcity_agent_name }}"
     state: started
-  loop: "{{ eamcity_agents }}"
+  loop: "{{ teamcity_agents }}"
