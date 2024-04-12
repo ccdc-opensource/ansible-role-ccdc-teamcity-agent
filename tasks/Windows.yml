@@ -71,7 +71,7 @@
 - name: Install agent Service
   ansible.windows.win_shell: .\service.install.bat
   args:
-     chdir: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\bin"
+    chdir: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\bin"
   loop: "{{ teamcity_agents }}"
   become: true
 
