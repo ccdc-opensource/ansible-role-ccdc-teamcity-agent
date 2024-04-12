@@ -3,7 +3,7 @@
 
 - name: Install 7zip + Java # noqa: name[template]
   win_chocolatey:
-    name: 
+    name:
       - 7zip.install
       - microsoft-openjdk17
     state: present
