@@ -75,8 +75,8 @@
   loop: "{{ teamcity_agents }}"
   become: true
 
-- name: Start agent service
-  ansible.windows.win_shell: "bin\\service.start.bat"
-  args:
-    chdir: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}"
-  loop: "{{ teamcity_agents }}"
+- name: Start TC agents service
+  ansible.windows.win_service:
+    name: "{{ item.teamcity_agent_name }}"
+    state: started
+  loop: "{{ eamcity_agents }}"
