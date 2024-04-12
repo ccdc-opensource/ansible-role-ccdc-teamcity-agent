@@ -97,7 +97,7 @@ wrapper.syslog.loglevel=NONE
 # Wrapper Windows Properties
 #********************************************************************
 # Title to use when running as a console
-wrapper.console.title="{{ item.teamcity_agent_name }}"
+wrapper.console.title={{ item.teamcity_agent_name }}
 
 #********************************************************************
 # Wrapper Windows NT/2000/XP Service Properties
@@ -108,13 +108,13 @@ wrapper.console.title="{{ item.teamcity_agent_name }}"
 #  service can then be reinstalled.
 
 # Name of the service
-wrapper.ntservice.name="{{ item.teamcity_agent_name }}"
+wrapper.ntservice.name={{ item.teamcity_agent_name }}
 
 # Display name of the service
-wrapper.ntservice.displayname="{{ item.teamcity_agent_name }}"
+wrapper.ntservice.displayname={{ item.teamcity_agent_name }}
 
 # Description of the service
-wrapper.ntservice.description=TeamCity agent "{{ item.teamcity_agent_name }}"
+wrapper.ntservice.description=TeamCity agent {{ item.teamcity_agent_name }}
 
 # Service dependencies.  Add dependencies as needed starting from 1
 wrapper.ntservice.dependency.1=
@@ -126,7 +126,7 @@ wrapper.ntservice.starttype=AUTO_START
 wrapper.ntservice.interactive=
 
 # User Account running the server
-wrapper.ntservice.account="{{ teamcity_build_username }}"
+wrapper.ntservice.account=.\{{ teamcity_build_username }}
 
 # User Account Password running the service
-wrapper.ntservice.password="{{ teamcity_build_user_password }}"
+wrapper.ntservice.password={{ teamcity_build_user_password }}
