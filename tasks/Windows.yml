@@ -65,7 +65,7 @@
 - name: "Setup wrapper.conf (Windows)"  # noqa: name[template]
   ansible.windows.win_template:
     src: "wrapper.conf.j2"
-    dest: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\launcher\\conf"
+    dest: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\launcher\\conf\\wrapper.conf"
   loop: "{{ teamcity_agents }}"
 
 - name: Install agent Service
