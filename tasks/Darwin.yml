@@ -1,41 +1,62 @@
 ---
-- name: Install homebrew
-  include_role:
-    name: geerlingguy.homebrew
 
-- name: Add AdoptOpenJDK/openjdk tap
-  homebrew_tap:
-    name: AdoptOpenJDK/openjdk
-    state: present
+- name: Insatll Homebrew + OpenJDK
+  ansible.builtin.include_role:
+    name: geerlingguy.mac.homebrew
+  vars:
+    # This is overwritten by our group_vars (cpp.build-machines)
+    homebrew_installed_packages:
+      - openjdk@17
+  when: not cpp_buildmachine
 
-- name: Install adoptopenjdk for teamcity agent on MacOS
-  homebrew_cask:
-    name: adoptopenjdk11
-    state: present
+- name: Symlink OpenJDK to system-wide Java VMs
+  ansible.builtin.file:
+    state: link
+    src: /usr/local/opt/openjdk@17/libexec/openjdk.jdk
+    dest: /Library/Java/JavaVirtualMachines/openjdk-17.jdk
+  become: true
 
 - name: Create teamcity agent install directory
-  file:
+  ansible.builtin.file:
     path: "{{ teamcity_agent_install_dir }}"
     state: directory
     mode: "0755"
+    owner: "{{ teamcity_build_username }}"
 
 - name: Download Agent zip
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ teamcity_buildagent_zip_url }}"
     dest: "{{ teamcity_downloaded_buildagent_zip }}"
     mode: 0775
 
 - name: "Ensure LaunchAgents directory exists"
-  file:
-    path: "{{ ansible_env.HOME }}/Library/LaunchAgents/"
+  ansible.builtin.file:
+    path: /Users/{{ teamcity_build_username }}/Library/LaunchAgents/"
     state: directory
     mode: 0755
+    owner: "{{ teamcity_build_username }}"
 
-- name: Install Build Agents
-  include_tasks:
-    file: "single_build_agent.yml"
-  vars:
-    agent_number_formatted: "{{ '%02d' | format(agent_number) }}"
-  loop: "{{ range(1, teamcity_number_of_agents + 1, 1) | list }}"
-  loop_control:
-    loop_var: agent_number
+- name: Install Teamcity Agent
+  ansible.builtin.include_tasks:
+    file: install_agent.yml
+
+- name: "Deploy TeamCity launchd service"
+  ansible.builtin.template:
+    src: jetbrains.teamcity.BuildAgent.plist.j2
+    dest: "/Users/{{ teamcity_build_username }}/Library/LaunchAgents/jetbrains.teamcity.BuildAgent.{{ item.teamcity_agent_name }}.plist"
+    mode: 0644
+  register: teamcity_single_agent_launchd_service
+  loop: "{{ teamcity_agents }}"
+
+- name: "Run TeamCity launchd service"  # noqa: no-changed-when
+  ansible.builtin.command: launchctl load "/Users/{{ teamcity_build_username }}/Library/LaunchAgents/jetbrains.teamcity.BuildAgent.{{ item.teamcity_agent_name }}.plist"
+  when: ansible_os_family == 'Darwin' and teamcity_single_agent_launchd_service.changed
+  loop: "{{ teamcity_agents }}"
+
+- name: "Change ownership of all Build Agent files"
+  ansible.builtin.file:
+    path: "{{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}"
+    owner: "{{ teamcity_build_username }}"
+    recurse: true
+  become: true
+  loop: "{{ teamcity_agents }}"

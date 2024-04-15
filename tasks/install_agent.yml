@@ -1,0 +1,70 @@
+---
+# Install Agents on Linux
+
+# Create directories
+
+- name: Ensure install directory for teamcity agents exists (Not windows)
+  ansible.builtin.file:
+    path: "{{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}"
+    state: directory
+    mode: 0775
+    recurse: true
+  loop: "{{ teamcity_agents }}"
+
+- name: "Check for existing configuration (Non Windows)"
+  ansible.builtin.stat:
+    path: "{{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}/conf/buildAgent.properties"
+  register: teamcity_agent_current_config_file
+  loop: "{{ teamcity_agents }}"
+
+- name: "Extract buildAgent.zip"
+  ansible.builtin.unarchive:
+    src: "{{ teamcity_downloaded_buildagent_zip }}"
+    dest: "{{ teamcity_agent_install_dir }}/{{ item.item.teamcity_agent_name }}"
+    creates: "{{ teamcity_agent_install_dir }}/{{ item.item.teamcity_agent_name }}/bin/agent.sh"
+    remote_src: true
+  when:
+    - not item.stat.exists
+  loop: "{{ teamcity_agent_current_config_file.results }}"
+
+- name: "Setup buildAgent.properties"
+  ansible.builtin.template:
+    src: "buildAgent.properties.j2"
+    dest: "{{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}/conf/buildAgent.properties"
+    mode: u=rw,g=r,o=r
+  loop: "{{ teamcity_agents }}"
+
+- name: "Change ownership of all Build Agent files"
+  ansible.builtin.file:
+    path: "{{ teamcity_agent_install_dir }}"
+    owner: "{{ teamcity_build_username }}"
+    recurse: true
+  become: true
+
+# Setup service for linux
+
+- name: "Deploy TeamCity systemd unit"
+  ansible.builtin.template:
+    src: "teamcity-agent.service.j2"
+    dest: "/etc/systemd/system/teamcity-{{ item.teamcity_agent_name }}.service"
+    mode: u=rw,g=r,o=r
+  become: true
+  register: teamcity_single_agent_unit
+  when: ansible_os_family in ['Debian', 'RedHat']
+  loop: "{{ teamcity_agents }}"
+
+- name: "Force systemd to reread configs"
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+  when: ansible_os_family in ['Debian', 'RedHat'] and teamcity_single_agent_unit.changed
+  loop: "{{ teamcity_agents }}"
+
+- name: "Start agent"
+  ansible.builtin.service:
+    name: "teamcity-{{ item.teamcity_agent_name }}"
+    state: started
+    enabled: true
+  become: true
+  when: ansible_os_family in ['Debian', 'RedHat']
+  loop: "{{ teamcity_agents }}"

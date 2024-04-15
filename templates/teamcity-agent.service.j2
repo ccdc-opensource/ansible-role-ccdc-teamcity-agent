@@ -1,7 +1,7 @@
 # https://www.jetbrains.com/help/teamcity/setting-up-and-running-additional-build-agents.html#SettingupandRunningAdditionalBuildAgents-AutomaticAgentStartunderLinux
 
 [Unit]
-Description="TeamCity Agent {{ teamcity_single_agent_name }}"
+Description="TeamCity Agent {{ item.teamcity_agent_name }}"
 After=network.target
 
 [Service]
@@ -16,9 +16,9 @@ RemainAfterExit=yes
 SuccessExitStatus=0 143
 
 User={{ teamcity_build_username }}
-SyslogIdentifier={{ teamcity_single_agent_name }}
-ExecStart={{ teamcity_single_agent_install_dir }}/bin/agent.sh run
-ExecStop={{ teamcity_single_agent_install_dir }}/bin/agent.sh stop
+SyslogIdentifier={{ item.teamcity_agent_name }}
+ExecStart={{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}/bin/agent.sh run
+ExecStop={{ teamcity_agent_install_dir }}/{{ item.teamcity_agent_name }}/bin/agent.sh stop
 
 RestartSec=5
 Restart=on-failure

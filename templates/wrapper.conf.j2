@@ -1,0 +1,132 @@
+#********************************************************************
+# Java Service Wrapper Properties for TeamCity Agent Launcher
+#********************************************************************
+
+#####################################################################
+###
+###   The path should point to 'java' program.
+###
+#####################################################################
+
+wrapper.java.command=java.exe
+
+wrapper.java.mainclass=org.tanukisoftware.wrapper.WrapperSimpleApp
+
+# Java Classpath
+wrapper.java.classpath.1=../launcher/lib/wrapper.jar
+wrapper.java.classpath.2=../launcher/lib/launcher.jar 
+
+# Java Library Path (location of Wrapper.DLL or libwrapper.so)
+wrapper.java.library.path.1=../launcher/lib
+wrapper.java.library.path.2=../launcher/bin
+
+# TeamCity agent launcher parameters
+#Preventing launcher exit on x64 when user logs off
+wrapper.java.additional.1=-Xrs
+
+# Initial Java Heap Size (in MB)
+wrapper.java.initmemory=16
+
+# Maximum Java Heap Size (in MB)
+wrapper.java.maxmemory=64
+
+###########################################################
+### TeamCity agent JVM parameters
+###
+### NOTE: There should be no gaps in parameters numbers, if
+### NOTE: you change parameters, you need to update numbering
+###
+##########################################################
+# Application parameters.
+wrapper.app.parameter.1=jetbrains.buildServer.agent.StandAloneLauncher
+wrapper.app.parameter.2=-ea
+wrapper.app.parameter.3=-Xmx512m
+# The next line can be removed (and the rest of the parameter names MUST BE renumbered) to prevent memory dumps on OutOfMemoryErrors
+wrapper.app.parameter.4=-XX:+HeapDumpOnOutOfMemoryError
+# Preventing process exiting on user log off
+wrapper.app.parameter.5=-Xrs
+# Uncomment the next line (insert the number instead of "N" and renumber the rest of the lines) to improve JVM performance
+# wrapper.app.parameter.N=-server
+wrapper.app.parameter.6=-Dlog4j2.configurationFile=file:../conf/teamcity-agent-log4j2.xml
+wrapper.app.parameter.7=-Dteamcity_logs=../logs/
+wrapper.app.parameter.8=-XX:+DisableAttachMechanism
+wrapper.app.parameter.9=--add-opens=java.base/java.lang=ALL-UNNAMED
+wrapper.app.parameter.10=-XX:+IgnoreUnrecognizedVMOptions
+wrapper.app.parameter.11=jetbrains.buildServer.agent.AgentMain
+# TeamCity agent parameters
+wrapper.app.parameter.12=-file
+wrapper.app.parameter.13=../conf/buildAgent.properties
+
+
+wrapper.working.dir=../../bin
+
+wrapper.ping.timeout=0
+
+#********************************************************************
+# Wrapper Logging Properties
+#********************************************************************
+# Format of output for the console.  (See Java Service Wrapper documentation for formats)
+wrapper.console.format=PM
+
+# Log Level for console output.  (See docs for log levels)
+wrapper.console.loglevel=INFO
+
+# Log file to use for wrapper output logging.
+wrapper.logfile=../logs/wrapper.log
+
+# Format of output for the log file.  (See docs for formats)
+wrapper.logfile.format=LPTM
+
+# Log Level for log file output.  (See docs for log levels)
+wrapper.logfile.loglevel=INFO
+
+# Maximum size that the log file will be allowed to grow to before
+#  the log is rolled. Size is specified in bytes.  The default value
+#  of 0, disables log rolling.  May abbreviate with the 'k' (kb) or
+#  'm' (mb) suffix.  For example: 10m = 10 megabytes.
+wrapper.logfile.maxsize=10m
+
+# Maximum number of rolled log files which will be allowed before old
+#  files are deleted.  The default value of 0 implies no limit.
+wrapper.logfile.maxfiles=10
+
+# Log Level for sys/event log output.  (See docs for log levels)
+wrapper.syslog.loglevel=NONE
+
+#********************************************************************
+# Wrapper Windows Properties
+#********************************************************************
+# Title to use when running as a console
+wrapper.console.title={{ item.teamcity_agent_name }}
+
+#********************************************************************
+# Wrapper Windows NT/2000/XP Service Properties
+#********************************************************************
+# WARNING - Do not modify any of these properties when an application
+#  using this configuration file has been installed as a service.
+#  Please uninstall the service before modifying this section.  The
+#  service can then be reinstalled.
+
+# Name of the service
+wrapper.ntservice.name={{ item.teamcity_agent_name }}
+
+# Display name of the service
+wrapper.ntservice.displayname={{ item.teamcity_agent_name }}
+
+# Description of the service
+wrapper.ntservice.description=TeamCity agent {{ item.teamcity_agent_name }}
+
+# Service dependencies.  Add dependencies as needed starting from 1
+wrapper.ntservice.dependency.1=
+
+# Mode in which the service is installed.  AUTO_START or DEMAND_START
+wrapper.ntservice.starttype=AUTO_START
+
+# Allow the service to interact with the desktop.
+wrapper.ntservice.interactive=
+
+# User Account running the server
+wrapper.ntservice.account=.\{{ teamcity_build_username }}
+
+# User Account Password running the service
+wrapper.ntservice.password={{ teamcity_build_user_password }}

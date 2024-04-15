@@ -1,4 +1,3 @@
 ---
 teamcity_agent_install_dir: /Users/{{ teamcity_build_username }}/teamcity
-teamcity_agent_hostname: bld-macos
-teamcity_agent_java_home_macos: /Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home/
+teamcity_agent_java_home_macos: /Library/Java/JavaVirtualMachines/openjdk-17.jdk/Contents/Home/

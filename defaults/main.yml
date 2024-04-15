@@ -4,5 +4,5 @@ teamcity_build_username: vagrant
 teamcity_build_user_password: vagrant
 teamcity_downloaded_buildagent_zip: "{{ teamcity_agent_install_dir }}/teamcity-agent.zip"
 teamcity_buildagent_zip_url: "{{ teamcity_server_url }}/update/buildAgent.zip"
-teamcity_number_of_agents: 2
 teamcity_buildagent_drive: E
+teamcity_agent_hostname: "{{ inventory_hostname }}"

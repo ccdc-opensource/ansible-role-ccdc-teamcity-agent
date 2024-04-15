@@ -1,31 +1,82 @@
 ---
-- name: Install Java
-  include_role:
-    name: lean_delivery.java
-  vars:
-    java_distribution: adoptopenjdk
-    java_major_version: 11
+# Install Windows Teamcity Agent
 
-- name: Install 7zip
+- name: Install 7zip + Java # noqa: name[template]
   win_chocolatey:
-    name: 7zip.install
+    name:
+      - 7zip.install
+      - microsoft-openjdk17
     state: present
 
-- name: Create teamcity agent install directory
+- name: Create teamcity agent install directory  # noqa: name[template]
   win_file:
     path: "{{ teamcity_agent_install_dir }}"
     state: directory
 
-- name: Download teamcity buildAgent.zip
+- name: Download teamcity buildAgent.zip  # noqa: name[template]
   win_get_url:
     url: "{{ teamcity_server_url }}/update/buildAgent.zip"
     dest: "{{ teamcity_downloaded_buildagent_zip }}"
 
-- name: Install Build Agents
-  include_tasks:
-    file: "single_build_agent.yml"
-  vars:
-    agent_number_formatted: "{{ '%02d' | format(agent_number) }}"
-  loop: "{{ range(1, teamcity_number_of_agents + 1, 1) | list }}"
-  loop_control:
-    loop_var: agent_number
+- name: "Ensure install directory exists (Windows)"  # noqa: name[template]
+  ansible.windows.win_file:
+    path: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}"
+    state: directory
+  loop: "{{ teamcity_agents }}"
+
+- name: "Check for existing configuration (Windows)"  # noqa: name[template]
+  ansible.windows.win_stat:
+    path: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\confansible\\buildAgent.properties"
+  register: teamcity_agent_current_config_file
+  loop: "{{ teamcity_agents }}"
+
+- name: "Extract buildAgent.zip (Windows)"  # noqa: name[template]
+  community.windows.win_unzip:
+    src: "{{ teamcity_downloaded_buildagent_zip }}"
+    dest: "{{ teamcity_agent_install_dir }}\\{{ item.item.teamcity_agent_name }}"
+    creates: "{{ teamcity_agent_install_dir }}\\{{ item.item.teamcity_agent_name }}\\bin\\agent.bat"
+  when:
+    - not item.stat.exists
+  loop: "{{ teamcity_agent_current_config_file.results }}"
+
+- name: "Setup buildAgent.properties (Windows)"  # noqa: name[template]
+  ansible.windows.win_template:
+    src: "buildAgent.properties.j2"
+    dest: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\conf\\buildAgent.properties"
+  loop: "{{ teamcity_agents }}"
+
+- name: "Change ownership of all Build Agent files"  # noqa: name[template]
+  ansible.windows.win_owner:
+    path: "{{ teamcity_agent_install_dir }}"
+    user: "{{ teamcity_build_username }}"
+    recurse: true
+
+- name: "Give {{ teamcity_build_username }} full control on files (Windows)"  # noqa: name[template]
+  ansible.windows.win_acl:
+    user: "{{ teamcity_build_username }}"
+    path: "{{ teamcity_agent_install_dir }}"
+    rights: FullControl
+    type: allow
+    state: present
+    propagation: InheritOnly
+    inherit: ContainerInherit, ObjectInherit
+
+# Enable TC Agent Service
+- name: "Setup wrapper.conf (Windows)"  # noqa: name[template]
+  ansible.windows.win_template:
+    src: "wrapper.conf.j2"
+    dest: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\launcher\\conf\\wrapper.conf"
+  loop: "{{ teamcity_agents }}"
+
+- name: Install agent Service
+  ansible.windows.win_shell: .\service.install.bat
+  args:
+    chdir: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\bin"
+  loop: "{{ teamcity_agents }}"
+  become: true
+
+- name: Start TC agents service
+  ansible.windows.win_service:
+    name: "{{ item.teamcity_agent_name }}"
+    state: started
+  loop: "{{ teamcity_agents }}"

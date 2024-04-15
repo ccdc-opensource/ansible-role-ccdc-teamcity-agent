@@ -8,7 +8,7 @@ galaxy_info:
   description: TeamCity agent setup (multiple agents per machine).
   company: The Cambridge Crystallographic Data Centre
   license: "license (BSD, MIT)"
-  min_ansible_version: 2.9
+  min_ansible_version: "2.9"
   platforms:
     - name: EL
       versions:
