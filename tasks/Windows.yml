@@ -60,15 +60,14 @@
     state: present
     propagation: InheritOnly
     inherit: ContainerInherit, ObjectInherit
-    
-# Check for service
 
+# Check for service
 - name: Check service exists for build agents
   ansible.windows.win_service:
     name: "{{ item.teamcity_agent_name }}"
   register: teamcity_agents_status
   loop: "{{ teamcity_agents }}"
-  
+
 # Enable TC Agent Service
 - name: "Setup wrapper.conf (Windows)"  # noqa: name[template]
   ansible.windows.win_template:
