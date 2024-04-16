@@ -82,7 +82,7 @@
     chdir: "{{ teamcity_agent_install_dir }}\\{{ item.item.teamcity_agent_name }}\\bin"
   loop: "{{ teamcity_agents_status.results }}"
   when:
-    - not item.stat.exists
+    - not item.exists
   become: true
 
 - name: Start TC agents service
