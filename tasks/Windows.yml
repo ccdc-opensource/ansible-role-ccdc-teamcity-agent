@@ -61,6 +61,13 @@
     propagation: InheritOnly
     inherit: ContainerInherit, ObjectInherit
 
+# Check for service
+- name: Check service exists for build agents
+  ansible.windows.win_service:
+    name: "{{ item.teamcity_agent_name }}"
+  register: teamcity_agents_status
+  loop: "{{ teamcity_agents }}"
+
 # Enable TC Agent Service
 - name: "Setup wrapper.conf (Windows)"  # noqa: name[template]
   ansible.windows.win_template:
@@ -71,8 +78,10 @@
 - name: Install agent Service
   ansible.windows.win_shell: .\service.install.bat
   args:
-    chdir: "{{ teamcity_agent_install_dir }}\\{{ item.teamcity_agent_name }}\\bin"
-  loop: "{{ teamcity_agents }}"
+    chdir: "{{ teamcity_agent_install_dir }}\\{{ item.item.teamcity_agent_name }}\\bin"
+  loop: "{{ teamcity_agents_status.results }}"
+  when:
+    - not item.exists
   become: true
 
 - name: Start TC agents service
