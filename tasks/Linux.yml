@@ -1,7 +1,7 @@
 ---
 - name: Install Java
-  ansible.builtin.apt:
-    name: openjdk-17-jre
+  ansible.builtin.yum:
+    name: java-17-openjdk-devel
     state: present 
     
 - name: Create teamcity agent install directory
