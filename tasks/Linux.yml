@@ -1,11 +1,9 @@
 ---
 - name: Install Java
-  ansible.builtin.include_role:
-    name: lean_delivery.java
-  vars:
-    java_distribution: adoptopenjdk
-    java_major_version: 11
-
+  ansible.builtin.apt:
+    name: openjdk-17-jre
+    state: present 
+    
 - name: Create teamcity agent install directory
   ansible.builtin.file:
     path: "{{ teamcity_agent_install_dir }}"
