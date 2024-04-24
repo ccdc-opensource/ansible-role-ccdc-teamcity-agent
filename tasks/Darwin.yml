@@ -1,5 +1,4 @@
 ---
-
 - name: Insatll Homebrew + OpenJDK
   ansible.builtin.include_role:
     name: geerlingguy.mac.homebrew
