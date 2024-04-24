@@ -2,9 +2,9 @@
 - name: Install Java
   ansible.builtin.yum:
     name: java-1.8.0-openjdk-devel
-    state: present 
+    state: present
   become: true
-    
+
 - name: Create teamcity agent install directory
   ansible.builtin.file:
     path: "{{ teamcity_agent_install_dir }}"
