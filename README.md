@@ -27,6 +27,8 @@ None.
 ## Example Playbook
 
     - hosts: all
+      vars:
+        homebrew_prefix: '/opt/homebrew'
       roles:
         - ccdc.teamcity_agent
 
