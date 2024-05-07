@@ -1,6 +1,6 @@
 ---
 - name: Install Java
-  ansible.builtin.yum:
+  ansible.builtin.package:
     name: java-1.8.0-openjdk-devel
     state: present
   become: true
