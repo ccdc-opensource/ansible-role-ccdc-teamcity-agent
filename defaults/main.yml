@@ -6,3 +6,5 @@ teamcity_downloaded_buildagent_zip: "{{ teamcity_agent_install_dir }}/teamcity-a
 teamcity_buildagent_zip_url: "{{ teamcity_server_url }}/update/buildAgent.zip"
 teamcity_buildagent_drive: E
 teamcity_agent_hostname: "{{ inventory_hostname }}"
+
+homebrew_prefix: "{{ (ansible_machine == 'arm64') | ternary('/opt/homebrew', '/usr/local') }}"
