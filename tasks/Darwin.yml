@@ -5,7 +5,7 @@
   vars:
     # This is overwritten by our group_vars (cpp.build-machines)
     homebrew_installed_packages:
-      - openjdk@17
+      - "{{ java.openjdk[ansible_os_family] }}"
   when: not cpp_buildmachine
 
 - name: Symlink OpenJDK to system-wide Java VMs

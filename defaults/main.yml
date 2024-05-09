@@ -8,3 +8,12 @@ teamcity_buildagent_drive: E
 teamcity_agent_hostname: "{{ inventory_hostname }}"
 
 homebrew_prefix: "{{ (ansible_machine == 'arm64') | ternary('/opt/homebrew', '/usr/local') }}"
+
+java_version: '17'
+java:
+  openjdk:
+    Debian: "openjdk-{{ java_version }}-jdk"
+    RedHat: "java-{{ java_version }}-openjdk"
+    FreeBSD: "openjdk{{ java_version }}"
+    Darwin: "openjdk@{{ java_version }}"
+    Windows: "microsoft-openjdk{{ java_version }}"

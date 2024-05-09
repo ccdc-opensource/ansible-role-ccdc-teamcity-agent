@@ -5,7 +5,7 @@
   win_chocolatey:
     name:
       - 7zip.install
-      - microsoft-openjdk17
+      - "{{ java.openjdk[ansible_os_family] }}"
     state: present
 
 - name: Create teamcity agent install directory  # noqa: name[template]
