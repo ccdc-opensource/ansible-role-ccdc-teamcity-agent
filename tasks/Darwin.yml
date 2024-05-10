@@ -1,17 +1,17 @@
 ---
-- name: Insatll Homebrew + OpenJDK
+- name: Install Homebrew + OpenJDK
   ansible.builtin.include_role:
     name: geerlingguy.mac.homebrew
   vars:
     # This is overwritten by our group_vars (cpp.build-machines)
     homebrew_installed_packages:
-      - openjdk@17
+      - "{{ java.openjdk[ansible_os_family] }}"
   when: not cpp_buildmachine
 
 - name: Symlink OpenJDK to system-wide Java VMs
   ansible.builtin.file:
     state: link
-    src: /usr/local/opt/openjdk@17/libexec/openjdk.jdk
+    src: "{{ homebrew_prefix }}/opt/openjdk@17/libexec/openjdk.jdk"
     dest: /Library/Java/JavaVirtualMachines/openjdk-17.jdk
   become: true
 

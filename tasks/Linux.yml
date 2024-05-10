@@ -1,7 +1,7 @@
 ---
 - name: Install Java
-  ansible.builtin.yum:
-    name: java-1.8.0-openjdk-devel
+  ansible.builtin.package:
+    name: "{{ java.openjdk[ansible_os_family] }}"
     state: present
   become: true
 

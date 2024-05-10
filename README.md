@@ -27,6 +27,17 @@ None.
 ## Example Playbook
 
     - hosts: all
+      vars:
+        homebrew_prefix: '/opt/homebrew'
+      roles:
+        - ccdc.teamcity_agent
+
+## Example Playbook with specific java version
+
+    - hosts: all
+      vars:
+        homebrew_prefix: '/opt/homebrew'
+        java_version: '18'
       roles:
         - ccdc.teamcity_agent
 
