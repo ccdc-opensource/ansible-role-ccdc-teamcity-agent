@@ -8,12 +8,14 @@
       - "{{ java.openjdk[ansible_os_family] }}"
   when: not cpp_buildmachine
 
-- name: Symlink OpenJDK to system-wide Java VMs
-  ansible.builtin.file:
-    state: link
-    src: "{{ homebrew_prefix }}/opt/openjdk@17/libexec/openjdk.jdk"
-    dest: /Library/Java/JavaVirtualMachines/openjdk-17.jdk
-  become: true
+- name: Link OpenJDK
+  ansible.builtin.command:
+    cmd: brew link openjdk@17
+  environment:
+    PATH: "/opt/homebrew/bin:{{ ansible_env.PATH }}"
+  register: link_package
+  changed_when: '"symlinks created." in link_package.stdout'
+  failed_when: link_package.rc != 0
 
 - name: Create teamcity agent install directory
   ansible.builtin.file:
