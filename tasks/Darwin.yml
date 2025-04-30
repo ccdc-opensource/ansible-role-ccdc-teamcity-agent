@@ -8,7 +8,7 @@
       - "{{ java.openjdk[ansible_os_family] }}"
   when: not cpp_buildmachine
 
-- name: Link OpenJDK
+- name: Link "{{ java.openjdk[ansible_os_family] }}"
   community.general.homebrew:
     name: "{{ java.openjdk[ansible_os_family] }}"
     state: linked
