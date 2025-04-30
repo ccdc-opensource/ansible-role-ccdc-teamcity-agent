@@ -8,14 +8,9 @@
       - "{{ java.openjdk[ansible_os_family] }}"
   when: not cpp_buildmachine
 
-- name: Link OpenJDK
-  ansible.builtin.command:
-    cmd: brew link openjdk@17
-  environment:
-    PATH: "/opt/homebrew/bin:{{ ansible_env.PATH }}"
-  register: link_package
-  changed_when: '"symlinks created." in link_package.stdout'
-  failed_when: link_package.rc != 0
+- community.general.homebrew:
+    name: openjdk@17
+    state: linked
 
 - name: Create teamcity agent install directory
   ansible.builtin.file:
