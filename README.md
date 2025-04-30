@@ -7,9 +7,8 @@ a service to start it, as well as configure it to connect to a TeamCity server.
 
 ## Requirements
 
-- lean_delivery.java: to install java on Windows/Linux
-- geerlingguy.homebrew: to install java on MacOS
-
+- geerlingguy.mac: to install java on MacOS
+- community.general
 ## Role Variables
 
 - teamcity_server_url: The url that the teamcity server responds to
