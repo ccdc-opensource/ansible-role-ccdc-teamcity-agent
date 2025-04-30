@@ -8,8 +8,9 @@
       - "{{ java.openjdk[ansible_os_family] }}"
   when: not cpp_buildmachine
 
-- community.general.homebrew:
-    name: openjdk@17
+- name: Link OpenJDK
+  community.general.homebrew:
+    name: "{{ java.openjdk[ansible_os_family] }}"
     state: linked
 
 - name: Create teamcity agent install directory
