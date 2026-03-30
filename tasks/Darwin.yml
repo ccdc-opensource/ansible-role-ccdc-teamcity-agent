@@ -31,13 +31,11 @@
     dest: "{{ teamcity_downloaded_buildagent_zip }}"
     mode: 0775
 
-- name: "Ensure LaunchDaemons directory exists"
+- name: "Ensure LaunchAgents directory exists"
   ansible.builtin.file:
-    path: "/Library/LaunchDaemons"
+    path: "{{ ansible_env.HOME }}/Library/LaunchAgents"
     state: directory
     mode: 0755
-    owner: "{{ teamcity_build_username }}"
-  become: true
 
 - name: Install Teamcity Agent
   ansible.builtin.include_tasks:
@@ -46,17 +44,15 @@
 - name: "Deploy TeamCity launchd service"
   ansible.builtin.template:
     src: jetbrains.teamcity.BuildAgent.plist.j2
-    dest: "/Library/LaunchDaemons/jetbrains.teamcity.BuildAgent.{{ item.teamcity_agent_name }}.plist"
+    dest: "{{ ansible_env.HOME }}/Library/LaunchAgents/jetbrains.teamcity.BuildAgent.{{ item.teamcity_agent_name }}.plist"
     mode: 0644
   register: teamcity_single_agent_launchd_service
   loop: "{{ teamcity_agents }}"
-  become: true
 
 - name: "Run TeamCity launchd service"  # noqa: no-changed-when
-  ansible.builtin.command: launchctl load "/Library/LaunchDaemons/jetbrains.teamcity.BuildAgent.{{ item.teamcity_agent_name }}.plist"
+  ansible.builtin.command: launchctl load "{{ ansible_env.HOME }}/Library/LaunchAgents/jetbrains.teamcity.BuildAgent.{{ item.teamcity_agent_name }}.plist"
   when: ansible_os_family == 'Darwin' and teamcity_single_agent_launchd_service.changed
   loop: "{{ teamcity_agents }}"
-  become: true
 
 - name: "Change ownership of all Build Agent files"
   ansible.builtin.file:
