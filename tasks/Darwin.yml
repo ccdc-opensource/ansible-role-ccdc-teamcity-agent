@@ -14,7 +14,7 @@
     state: linked
 
 - name: "Ensure {{ java.openjdk[ansible_os_family] }} is linked"
-  ansible.builtin.command: ln -sfn $HOMEBREW_PREFIX/opt/openjdk@17/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-17.jdk
+  ansible.builtin.command: ln -sfn $HOMEBREW_PREFIX/opt/openjdk@21/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-21.jdk
   become: true
   when: ansible_os_family == 'Darwin'
 
