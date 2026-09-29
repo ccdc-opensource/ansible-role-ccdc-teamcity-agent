@@ -16,4 +16,4 @@ java:
     RedHat: "java-{{ java_version }}-openjdk"
     FreeBSD: "openjdk{{ java_version }}"
     Darwin: "openjdk@{{ java_version }}"
-    Windows: "microsoft-openjdk{{ java_version }}"
+    Windows: "microsoft-openjdk{{ (java_version | string == '21') | ternary('-', '') }}{{ java_version }}"
